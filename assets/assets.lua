@@ -7,6 +7,9 @@ return {
         River = love.graphics.newImage("/assets/jon/river.png"),
         BluePlayer = {
             Standard = love.graphics.newImage("/assets/jon/standard_blue.png")
+        },
+        RedPlayer = {
+            Standard = love.graphics.newImage("/assets/jon/standard_red.png")
         }
     }
 }

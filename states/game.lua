@@ -1,7 +1,7 @@
 local Camera = require "lib.hump.camera"
 
 local Map = require "classes.map"
-local Const = require "classes.const"
+local Params = require "classes.params"
 local Player = require "classes.player"
 
 local Game = {}
@@ -11,19 +11,23 @@ function Game:init()
     
     -- init player data
     self.Players = {}
-    for i, v in ipairs(Const.Game.Players) do
+    for i, v in ipairs(Params.Game.Players) do
         self.Players[i] = Player(v) -- index it
-        self.Player[v] = self.Players[i] -- and key it
+        self.Players[v] = self.Players[i] -- and key it
     end
 
-    -- init map
-    self.Map = Map()
-    self:_mapInit()
+    
 
     -- ui?
 
     -- camera
     self.Camera = Camera(1, 1)
+end
+
+function Game:enter()
+    -- init map
+    self.Map = Map()
+    self:_mapInit()
 end
 
 function Game:_mapInit()
@@ -33,24 +37,24 @@ end
 
 function Game._CameraViewPort()
     love.graphics.rectangle("fill",
-        Const.Ui.SideBar,
-        Const.Ui.StatusBar,
-        love.graphics.getWidth() - Const.Ui.SideBar,
-        love.graphics.getHeight() - Const.Ui.StatusBar)
+        Params.Ui.SideBar,
+        Params.Ui.StatusBar,
+        love.graphics.getWidth() - Params.Ui.SideBar,
+        love.graphics.getHeight() - Params.Ui.StatusBar)
 end
 
 function Game:draw()
     -- ui
     love.graphics.setColor(64, 64, 64, 255)
-    love.graphics.rectangle("fill", 0, Const.Ui.StatusBar, Const.Ui.SideBar, love.graphics.getHeight() - Const.Ui.StatusBar)
+    love.graphics.rectangle("fill", 0, Params.Ui.StatusBar, Params.Ui.SideBar, love.graphics.getHeight() - Params.Ui.StatusBar)
     love.graphics.setColor(32, 32, 32, 255)
-    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), Const.Ui.StatusBar)
+    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), Params.Ui.StatusBar)
     love.graphics.setColor(255, 255, 255, 255)
 
     -- camera viewport
     love.graphics.stencil(self._CameraViewPort, "replace", 1)
     love.graphics.setStencilTest("greater", 0)
-    love.graphics.translate(Const.Ui.SideBar, Const.Ui.StatusBar)
+    love.graphics.translate(Params.Ui.SideBar, Params.Ui.StatusBar)
     self.Camera:attach()
     self.Map:draw()
     self.Camera:detach()
@@ -67,27 +71,27 @@ function Game:keypressed(key)
     end
 
     if key == "up" then
-        self.Camera:move(0, -Const.Camera.ScrollSpeed)
+        self.Camera:move(0, -Params.Camera.ScrollSpeed)
     end
     if key == "down" then
-        self.Camera:move(0, Const.Camera.ScrollSpeed)
+        self.Camera:move(0, Params.Camera.ScrollSpeed)
     end
     if key == "left" then
-        self.Camera:move(-Const.Camera.ScrollSpeed, 0)
+        self.Camera:move(-Params.Camera.ScrollSpeed, 0)
     end
     if key == "right" then
-        self.Camera:move(Const.Camera.ScrollSpeed, 0)
+        self.Camera:move(Params.Camera.ScrollSpeed, 0)
     end
 end
 
 function Game:wheelmoved(x, y)
     if y > 0 then
-        if self.Camera.scale < Const.Camera.MaxZoom then
-            self.Camera:zoom(Const.Camera.ZoomIncrement)
+        if self.Camera.scale < Params.Camera.MaxZoom then
+            self.Camera:zoom(Params.Camera.ZoomIncrement)
         end
     elseif y < 0 then
-        if self.Camera.scale > Const.Camera.MinZoom then
-            self.Camera:zoom(Const.Camera.ZoomExcrement)
+        if self.Camera.scale > Params.Camera.MinZoom then
+            self.Camera:zoom(Params.Camera.ZoomExcrement)
         end
     end
 end

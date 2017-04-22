@@ -1,15 +1,17 @@
 local Class = require "lib.hump.class"
-local Const = require "classes.const"
+local Params = require "classes.params"
 
 local House = Class {
-    init = function(self, owner, type)
+    init = function(self, owner, prepopulate)
         self.Owner = owner
-        self.Type = type or Const.House.Type.Standard
-    end
+        self.Population = prepopulate or self.Population
+    end,
+    Type = Params.House.Type.Standard,
+    Population = 1
 }
 
-function House:draw()
-    love.graphics.draw(owner.Sprites.Standard, x, y)
+function House:draw(x, y)
+    love.graphics.draw(self.Owner.Sprites.Standard, x, y)
 end
 
 return House

@@ -1,15 +1,15 @@
 local Class = require "lib.hump.class"
 local Vector = require "lib.hump.vector"
 
-local Const = require "classes.const"
+local Params = require "classes.params"
 local Tile = require "classes.tile"
 
 local Map = Class {
     init = function(self)
         self:_clear()
     end,
-    Width = Const.Map.Width,
-    Height = Const.Map.Height,
+    Width = Params.Map.Width,
+    Height = Params.Map.Height,
     Tiles = {}
 }
 
@@ -18,12 +18,12 @@ local Map = Class {
 
 function Map:Spawn()
     local excludeQ = {}
-    for i=1, Const.Game.Players do
+    for _, v in ipairs(Gamestate.current().Players) do
         local done = false
         while not done do
             local q = self:_getRandomQuadrant(excludeQ)
             local pos = self:_getRandomTile(q)
-            if self.Tiles[pos.y][pos.x]:BuildHouse(i) then
+            if self.Tiles[pos.y][pos.x]:BuildHouse(v, Params.Game.StartingPop) then
                 table.insert(excludeQ, q)
                 done = true
             end
@@ -44,17 +44,17 @@ function Map:Generate()
     
     -- keep a dictionary of points so we can check if that location is already one
     -- also keep a list we can iterate to find the nearest, as this will be more efficient
-    local nPoints = Const.Map.Centres
+    local nPoints = Params.Map.Centres
     local points = {} --we can use the same table for the dictionary and the list, because lua
     for i=1, self.Height > nPoints and self.Height or nPoints do
         points[i] = {}
     end
 
-    local nWoodland, nGrain = Const.Map.Woodland / 100 * nPoints, Const.Map.Grain / 100 * nPoints
+    local nWoodland, nGrain = Params.Map.Woodland / 100 * nPoints, Params.Map.Grain / 100 * nPoints
 
-    self:_pickCentres(points, 1, nWoodland, Const.Tile.Type.Woodland) -- Woodland nodes
-    self:_pickCentres(points, nWoodland +1, nWoodland+nGrain, Const.Tile.Type.Grain) -- Grain nodes
-    self:_pickCentres(points, nWoodland+nGrain+1, nPoints, Const.Tile.Type.Grass) -- Grass nodes
+    self:_pickCentres(points, 1, nWoodland, Params.Tile.Type.Woodland) -- Woodland nodes
+    self:_pickCentres(points, nWoodland +1, nWoodland+nGrain, Params.Tile.Type.Grain) -- Grain nodes
+    self:_pickCentres(points, nWoodland+nGrain+1, nPoints, Params.Tile.Type.Grass) -- Grass nodes
 
     -- now iterate the tile map and populate tiles based on centres
     for y=1, #self.Tiles do
@@ -87,7 +87,7 @@ function Map:_clear()
 end
 
 function Map:_getRandomTile(quad)
-    local q, xMin, yMin, xMax, yMax = Const.Map.Quadrant, 1, 1, self.Width, self.Height
+    local q, xMin, yMin, xMax, yMax = Params.Map.Quadrant, 1, 1, self.Width, self.Height
     if     quad == q.NW then xMax, yMax = self.Width / 2, self.Height / 2
     elseif quad == q.NE then xMin, yMax = self.Width / 2, self.Height / 2
     elseif quad == q.SE then xMin, yMin = self.Width / 2, self.Height / 2
@@ -116,7 +116,7 @@ function Map:_getNearestCentreType(points, x, y)
     local pointsByDist = {}
     -- get vector magnitude between our point and all the centres
     -- (theoretically you could probably cull some centres but w/e)
-    for i=1, Const.Map.Centres do
+    for i=1, Params.Map.Centres do
         local p = Vector(x, y)
         local c = points[i].point
         if p == c then return points[y][x] end --shortcut if we ARE a point
@@ -143,15 +143,15 @@ function Map:_getRandomQuadrant(excludeQ)
 end
 
 function Map:_isNorthSouth(dir)
-    return (dir == Const.Map.Direction.North or dir == Const.Map.Direction.South)
+    return (dir == Params.Map.Direction.North or dir == Params.Map.Direction.South)
 end
 
 function Map:_isEastWest(dir)
-    return (dir == Const.Map.Direction.East or dir == Const.Map.Direction.West)
+    return (dir == Params.Map.Direction.East or dir == Params.Map.Direction.West)
 end
 
 function Map:_getRiverStart(dir)
-    local deadzone = (100 - Const.Map.RiverStartZone / 2) --we don't want to start too near a corner as it increases the chances of dumb rivers
+    local deadzone = (100 - Params.Map.RiverStartZone / 2) --we don't want to start too near a corner as it increases the chances of dumb rivers
     local x, y = 1, 1
     if self:_isEastWest(dir) then
         y = math.random(
@@ -163,8 +163,8 @@ function Map:_getRiverStart(dir)
             self.Width * (100 - deadzone) / 100) -- or a random x for vertical
     end
     -- handle the directions that don't the perpendicular coord as 1
-    if dir == Const.Map.Direction.North then y = self.Height end
-    if dir == Const.Map.Direction.West then x = self.Width end
+    if dir == Params.Map.Direction.North then y = self.Height end
+    if dir == Params.Map.Direction.West then x = self.Width end
     return { x = x, y = y }
 end
 
@@ -180,10 +180,10 @@ function Map:_outOfBounds(posx, y)
 end
 
 function Map:_getOppositeDir(dir)
-    if dir == Const.Map.Direction.North then return Const.Map.Direction.South end
-    if dir == Const.Map.Direction.South then return Const.Map.Direction.North end
-    if dir == Const.Map.Direction.West then return Const.Map.Direction.East end
-    if dir == Const.Map.Direction.East then return Const.Map.Direction.West end
+    if dir == Params.Map.Direction.North then return Params.Map.Direction.South end
+    if dir == Params.Map.Direction.South then return Params.Map.Direction.North end
+    if dir == Params.Map.Direction.West then return Params.Map.Direction.East end
+    if dir == Params.Map.Direction.East then return Params.Map.Direction.West end
 end
 
 function Map:_getAdjacent(posx, y)
@@ -207,12 +207,12 @@ end
 function Map:_generateRiver()
     --we'll use this recursively to plot the river
     local function nextRiverTile(pos, oldDir, favourDir)
-        self.Tiles[pos.y][pos.x] = Tile(pos.x, pos.y, Const.Tile.Type.River) --render the current tile
+        self.Tiles[pos.y][pos.x] = Tile(pos.x, pos.y, Params.Tile.Type.River) --render the current tile
 
         -- set all adjacent tiles to riverside
         for _, v in ipairs(self:_getAdjacent(pos)) do
             if not self.Tiles[v.y][v.x] then
-                self.Tiles[v.y][v.x] = Tile(v.x, v.y, Const.Tile.Type.Riverside)
+                self.Tiles[v.y][v.x] = Tile(v.x, v.y, Params.Tile.Type.Riverside)
             end
         end
 
@@ -221,10 +221,10 @@ function Map:_generateRiver()
         if dir == self:_getOppositeDir(oldDir) then dir = favourDir end -- can't double back on ourselves; use this to weight the favoured direction
         if dir == self:_getOppositeDir(favourDir) then dir = favourDir end -- also can't go back towards the start (river flowing uphill?)
 
-        if dir == Const.Map.Direction.North then pos.y = pos.y - 1 end
-        if dir == Const.Map.Direction.South then pos.y = pos.y + 1 end
-        if dir == Const.Map.Direction.East then pos.x = pos.x + 1 end
-        if dir == Const.Map.Direction.West then pos.x = pos.x - 1 end
+        if dir == Params.Map.Direction.North then pos.y = pos.y - 1 end
+        if dir == Params.Map.Direction.South then pos.y = pos.y + 1 end
+        if dir == Params.Map.Direction.East then pos.x = pos.x + 1 end
+        if dir == Params.Map.Direction.West then pos.x = pos.x - 1 end
 
         if not self:_outOfBounds(pos) then
             nextRiverTile(pos, dir, favourDir)

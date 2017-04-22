@@ -11,10 +11,13 @@ return {
         MaxZoom = 2
     },
     Game = {
-        Players = {
+        Players = { -- more than 4 players will break, but technically up to 4 should work if assets are provided, even though only 2 is intended
             [1] = "Blue",
             [2] = "Red"
-        }
+        },
+        StartingFood = 50,
+        StartingPop = 4,
+        BuildTrigger = 4
     },
     Tile = {
         Size = 32,
