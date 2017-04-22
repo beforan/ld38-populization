@@ -66,24 +66,28 @@ function Game:keypressed(key)
     end
 
     if key == "up" then
-        self.Camera:move(0, -Const.Ui.CameraScroll)
+        self.Camera:move(0, -Const.Camera.ScrollSpeed)
     end
     if key == "down" then
-        self.Camera:move(0, Const.Ui.CameraScroll)
+        self.Camera:move(0, Const.Camera.ScrollSpeed)
     end
     if key == "left" then
-        self.Camera:move(-Const.Ui.CameraScroll, 0)
+        self.Camera:move(-Const.Camera.ScrollSpeed, 0)
     end
     if key == "right" then
-        self.Camera:move(Const.Ui.CameraScroll, 0)
+        self.Camera:move(Const.Camera.ScrollSpeed, 0)
     end
 end
 
 function Game:wheelmoved(x, y)
     if y > 0 then
-        if self.Camera.scale < 2 then self.Camera:zoom(1.1) end
+        if self.Camera.scale < Const.Camera.MaxZoom then
+            self.Camera:zoom(Const.Camera.ZoomIncrement)
+        end
     elseif y < 0 then
-        if self.Camera.scale > .4 then self.Camera:zoom(0.9) end
+        if self.Camera.scale > Const.Camera.MinZoom then
+            self.Camera:zoom(Const.Camera.ZoomExcrement)
+        end
     end
 end
 

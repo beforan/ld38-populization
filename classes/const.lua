@@ -1,8 +1,14 @@
 return {
     Ui = {
         SideBar = 200, -- width in px
-        StatusBar = 30, -- height in px
-        CameraScroll = 10
+        StatusBar = 30 -- height in px
+    },
+    Camera = {
+        ScrollSpeed = 10,
+        ZoomIncrement = 1.1,
+        ZoomExcrement = 0.9, -- couldn't resist
+        MinZoom = 0.4,
+        MaxZoom = 3
     },
     Game = {
         Players = 2
