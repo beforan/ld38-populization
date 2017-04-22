@@ -11,5 +11,9 @@ return {
         RedPlayer = {
             Standard = love.graphics.newImage("/assets/jon/standard_red.png")
         }
+    },
+    Fonts = {
+        Default = love.graphics.getFont(),
+        StatusIcons = love.graphics.newFont("/assets/font-awesome/fontawesome-webfont.ttf", 14)
     }
 }

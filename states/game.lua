@@ -3,6 +3,8 @@ local Camera = require "lib.hump.camera"
 local Map = require "classes.map"
 local Params = require "classes.params"
 local Player = require "classes.player"
+local Assets = require "assets.assets"
+local utf8 = require "utf8"
 
 local Game = {}
 
@@ -43,6 +45,12 @@ function Game._CameraViewPort()
         love.graphics.getHeight() - Params.Ui.StatusBar)
 end
 
+function Game:drawStatus()
+    -- Population
+    love.graphics.setFont(Assets.Fonts.StatusIcons)
+    love.graphics.print(utf8.char(0xf0c0), 10, 10)
+end
+
 function Game:draw()
     -- ui
     love.graphics.setColor(64, 64, 64, 255)
@@ -50,6 +58,7 @@ function Game:draw()
     love.graphics.setColor(32, 32, 32, 255)
     love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), Params.Ui.StatusBar)
     love.graphics.setColor(255, 255, 255, 255)
+    self:drawStatus()
 
     -- camera viewport
     love.graphics.stencil(self._CameraViewPort, "replace", 1)
