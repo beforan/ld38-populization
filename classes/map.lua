@@ -59,12 +59,17 @@ function Map:Generate()
     self:_clear()
     
     -- River first
-    -- pick an x
-    local xRiver = math.random(self.Width)
-    print(xRiver)
-    -- vertical river ;)
-    for y=1, #self.Tiles do
-        self.Tiles[y][xRiver] = Tile(xRiver, y, Const.Tile.Type.River)
+
+    --pick a direction
+    local riverDir = math.random(2)
+    -- pick an coord
+    local riverPos = riverDir == 1 and math.random(self.Width) or math.random(self.Height)
+
+    -- straight river ;)
+    for p=1, #self.Tiles do
+        local x = riverDir == 1 and riverPos or p
+        local y = riverDir == 2 and riverPos or p
+        self.Tiles[y][x] = Tile(x, y, Const.Tile.Type.River)
     end
 
     -- then distribute grass, woodland and grain
