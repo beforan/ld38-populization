@@ -33,7 +33,7 @@ end
 
 function Map:Generate()
     self:_clear()
-    
+
     self:_generateRiver() --river first
 
     -- then distribute grass, woodland and grain

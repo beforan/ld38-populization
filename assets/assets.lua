@@ -1,3 +1,5 @@
+local utf8 = require "utf8" -- for fa icons
+
 return {
     Sprites = {
         Grass = love.graphics.newImage("/assets/jon/grass.png"),
@@ -15,5 +17,8 @@ return {
     Fonts = {
         Default = love.graphics.getFont(),
         StatusIcons = love.graphics.newFont("/assets/font-awesome/fontawesome-webfont.ttf", 14)
+    },
+    Icons = { --Oh god yes a unicode lookup for the fa icons i'm actually using
+        Population = utf8.char(0xf0c0)
     }
 }

@@ -8,47 +8,52 @@ local utf8 = require "utf8"
 
 local Game = {}
 
+local cameraViewPort = { -- bounding box of the viewport
+    x = Params.Ui.SideBar,
+    y = Params.Ui.StatusBar,
+    w = love.graphics.getWidth() - Params.Ui.SideBar,
+    h = love.graphics.getHeight() - Params.Ui.StatusBar
+}
+
 function Game:init()
     love.keyboard.setKeyRepeat(true)
-    
-    -- init player data
+    self.Map = Map()
+    self.Camera = Camera()
+end
+
+function Game:enter()
+    self:_newGame()
+end
+
+function Game:_newGame()
+    -- player data
     self.Players = {}
     for i, v in ipairs(Params.Game.Players) do
         self.Players[i] = Player(v) -- index it
         self.Players[v] = self.Players[i] -- and key it
     end
-
     
-
-    -- ui?
-
-    -- camera
-    self.Camera = Camera(1, 1)
-end
-
-function Game:enter()
     -- init map
-    self.Map = Map()
-    self:_mapInit()
-end
-
-function Game:_mapInit()
     self.Map:Generate()
     self.Map:Spawn()
+
+    -- init camera
+    local humanSpawn = self.Players[1].Houses[1].Site
+    self.Camera:lookAt(humanSpawn:RealX(), humanSpawn:RealY())
 end
 
 function Game._CameraViewPort()
     love.graphics.rectangle("fill",
-        Params.Ui.SideBar,
-        Params.Ui.StatusBar,
-        love.graphics.getWidth() - Params.Ui.SideBar,
-        love.graphics.getHeight() - Params.Ui.StatusBar)
+        cameraViewPort.x, cameraViewPort.y,
+        cameraViewPort.w, cameraViewPort.h)
 end
 
 function Game:drawStatus()
     -- Population
     love.graphics.setFont(Assets.Fonts.StatusIcons)
-    love.graphics.print(utf8.char(0xf0c0), 10, 10)
+    love.graphics.print(Assets.Icons.Population, 10, 10)
+    love.graphics.setFont(Assets.Fonts.Default)
+    love.graphics.print(self.Players[1].VitalStatistix.Population, 30, 10)
 end
 
 function Game:draw()
@@ -63,7 +68,7 @@ function Game:draw()
     -- camera viewport
     love.graphics.stencil(self._CameraViewPort, "replace", 1)
     love.graphics.setStencilTest("greater", 0)
-    love.graphics.translate(Params.Ui.SideBar, Params.Ui.StatusBar)
+    love.graphics.translate(Params.Ui.SideBar / 2, Params.Ui.StatusBar / 2)
     self.Camera:attach()
     self.Map:draw()
     self.Camera:detach()
@@ -73,10 +78,17 @@ function Game:draw()
     love.graphics.setStencilTest()
 end
 
+function Game:update(dt)
+    --let's try camera clamping!
+    self.Camera.x = math.clamp(self.Camera.x, cameraViewPort.w / 2 * 1/self.Camera.scale, self.Map.Width * Params.Tile.Size - cameraViewPort.w / 2 * 1/self.Camera.scale)
+    self.Camera.y = math.clamp(self.Camera.y, cameraViewPort.h / 2 * 1/self.Camera.scale, self.Map.Height * Params.Tile.Size - cameraViewPort.h / 2 * 1/self.Camera.scale)
+end
+
 function Game:keypressed(key)
     if key == "m" then
         print("Reticulating splines")
-        self:_mapInit()
+        self:_newGame()
+        return
     end
 
     if key == "up" then
@@ -104,5 +116,9 @@ function Game:wheelmoved(x, y)
         end
     end
 end
+
+-- function Game:mousemoved(x, y)
+--     self.Camera:lockPosition(x, y)
+-- end
 
 return Game

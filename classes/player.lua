@@ -6,12 +6,13 @@ local Player = Class {
     init = function(self, player)
         self.Colour = player
         self.Sprites = Assets.Sprites[player .. "Player"]
-    end,
-    Houses = {},
-    Vitalstatistix = {
-        Food = Params.Game.Start.Food,
-        Lumber = Params.Game.Start.Lumber
-    }
+        self.Houses = {}
+        self.VitalStatistix = {
+            Food = Params.Game.Start.Food,
+            Lumber = Params.Game.Start.Lumber,
+            Population = Params.Game.Start.Pop
+        }
+    end
 }
 
 return Player

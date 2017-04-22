@@ -8,12 +8,12 @@ local Tile = Class {
         self.X = x -- tilemap coords
         self.Y = y
         self.Type = type or Params.Tile.Type.Grass
+        self.House = nil
     end,
     Width = Params.Tile.Size,
     Height = Params.Tile.Size,
     RealX = function(self) return (self.X - 1) * self.Width end, -- pixel coords top
     RealY = function(self) return (self.Y - 1) * self.Height end, -- and left
-    House = nil,
     Buildable = function(self) return self.Type ~= Params.Tile.Type.Woodland and self.Type ~= Params.Tile.Type.River end
 }
 
@@ -28,13 +28,13 @@ function Tile:draw()
     if self.Type == Params.Tile.Type.Riverside   then love.graphics.draw(Assets.Sprites.Riverside, x, y) end
 
     if self.House then
-        self.House:draw(x, y)
+        self.House:draw()
     end
 end
 
 function Tile:BuildHouse(player)
     if not self:Buildable() then return false end
-    self.House = House(player)
+    self.House = House(player, self)
     table.insert(player.Houses, self.House)
     return self.House
 end
