@@ -58,7 +58,14 @@ end
 function Map:Generate()
     self:_clear()
     
-    -- River will need to go first when we do it
+    -- River first
+    -- pick an x
+    local xRiver = math.random(self.Width)
+    print(xRiver)
+    -- vertical river ;)
+    for y=1, #self.Tiles do
+        self.Tiles[y][xRiver] = Tile(xRiver, y, Const.Tile.Type.River)
+    end
 
     -- then distribute grass, woodland and grain
     
@@ -66,10 +73,10 @@ function Map:Generate()
     -- then voronoi distribution against these nodes for the rest
     -- then weighting of the center points should guarantee the weighting we want in the final map
     
-    --keep a dictionary of points so we can check if that location is already one
-    --also keep a list we can iterate to find the nearest, as this will be more efficient
+    -- keep a dictionary of points so we can check if that location is already one
+    -- also keep a list we can iterate to find the nearest, as this will be more efficient
     local nPoints = Const.Map.Centres
-    points = {} --we can use the same table, because lua
+    points = {} --we can use the same table for the dictionary and the list, because lua
     for i=1, self.Height > nPoints and self.Height or nPoints do
         points[i] = {}
     end

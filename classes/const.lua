@@ -1,6 +1,6 @@
 return {
     Tile = {
-        Size = 32,
+        Size = 10,
         Type = {
             Grass = "Grass",
             Woodland = "Woodland",
@@ -18,6 +18,6 @@ return {
         -- everything else if grass
         Woodland = 20,
         Grain = 20,
-        Centres = 100
+        Centres = 100 -- how many centre nodes used for procgen
     }
 }
