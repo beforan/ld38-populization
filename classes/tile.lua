@@ -9,15 +9,16 @@ local Tile = require "lib.hump.class" {
     end,
     Width = Const.TileSize,
     Height = Const.TileSize,
-    RealX = function(self) return self.X * self.Width end, -- pixel coords top
-    RealY = function(self) return self.Y * self.Height end -- and left
+    RealX = function(self) return (self.X - 1) * self.Width end, -- pixel coords top
+    RealY = function(self) return (self.Y - 1) * self.Height end -- and left
 }
 
 function Tile:draw()
-    love.graphics.printf(self.Type, self:RealX(), self:RealY() + self.Height / 2, self.Width, "center")
+    love.graphics.printf(self.Type, self:RealX(), self:RealY(), self.Width, "center")
+    love.graphics.rectangle("line", self:GetBoundingBox())
 end
 
-function Tile:getBoundingBox()
+function Tile:GetBoundingBox()
     return self:RealX(), self:RealY(), self.Width, self.Height
 end
 
