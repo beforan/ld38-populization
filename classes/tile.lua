@@ -1,21 +1,30 @@
+local Class = require "lib.hump.class"
 local Const = require "classes.const"
 
-local Tile = require "lib.hump.class" {
+local Tile = Class {
     init = function(self, x, y, type)
-        self.Name = "tile" -- think hump.class can use this?
         self.X = x -- tilemap coords
         self.Y = y
-        self.Type = type or "grass"
+        self.Type = type or Const.Tile.Type.Grass
     end,
-    Width = Const.TileSize,
-    Height = Const.TileSize,
+    Width = Const.Tile.Size,
+    Height = Const.Tile.Size,
     RealX = function(self) return (self.X - 1) * self.Width end, -- pixel coords top
     RealY = function(self) return (self.Y - 1) * self.Height end -- and left
 }
 
 function Tile:draw()
-    love.graphics.printf(self.Type, self:RealX(), self:RealY(), self.Width, "center")
-    love.graphics.rectangle("line", self:GetBoundingBox())
+    -- set color (sprite later?) based on type
+    if self.Type == Const.Tile.Type.Grass then love.graphics.setColor(76, 153, 0, 255) end
+    if self.Type == Const.Tile.Type.Woodland then love.graphics.setColor(0, 102, 51, 255) end
+    if self.Type == Const.Tile.Type.Deforested then love.graphics.setColor(139, 69, 19, 255) end
+    if self.Type == Const.Tile.Type.Grain then love.graphics.setColor(245, 222, 179, 255) end
+    if self.Type == Const.Tile.Type.River then love.graphics.setColor(0, 76, 153, 255) end
+    if self.Type == Const.Tile.Type.Riverside then love.graphics.setColor(51, 102, 0, 255) end
+    
+    love.graphics.rectangle("fill", self:GetBoundingBox())
+
+    love.graphics.setColor(255, 255, 255, 255) -- reset
 end
 
 function Tile:GetBoundingBox()

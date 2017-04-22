@@ -1,13 +1,21 @@
-local Game = {}
 local Map = require "classes.map"
+
+local Game = {}
 
 function Game:init()
     self.Map = Map()
-    Map:Generate()
+    self.Map:Generate()
 end
 
 function Game:draw()
-    Map:draw()
+    self.Map:draw()
+end
+
+function Game:keypressed(key)
+    if key == "m" then
+        print("Reticulating splines")
+        self.Map:Generate()
+    end
 end
 
 return Game
