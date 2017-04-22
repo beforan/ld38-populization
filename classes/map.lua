@@ -4,9 +4,6 @@ local Vector = require "lib.hump.vector"
 local Const = require "classes.const"
 local Tile = require "classes.tile"
 
-
-local points
-
 local Map = Class {
     init = function(self)
         self:_clear()
@@ -15,6 +12,58 @@ local Map = Class {
     Height = Const.Map.Height,
     Tiles = {}
 }
+
+
+-- "public" methods
+
+function Map:Generate()
+    self:_clear()
+    
+    self:_generateRiver() --river first
+
+    -- then distribute grass, woodland and grain
+    
+    -- we'll use n points, in our defined ratio, as randomly picked (non-river) centres
+    -- then voronoi distribution against these nodes for the rest
+    -- then weighting of the center points should guarantee the weighting we want in the final map
+    
+    -- keep a dictionary of points so we can check if that location is already one
+    -- also keep a list we can iterate to find the nearest, as this will be more efficient
+    local nPoints = Const.Map.Centres
+    local points = {} --we can use the same table for the dictionary and the list, because lua
+    for i=1, self.Height > nPoints and self.Height or nPoints do
+        points[i] = {}
+    end
+
+    local nWoodland, nGrain = Const.Map.Woodland / 100 * nPoints, Const.Map.Grain / 100 * nPoints
+
+    self:_pickCentres(points, 1, nWoodland, Const.Tile.Type.Woodland) -- Woodland nodes
+    self:_pickCentres(points, nWoodland +1, nWoodland+nGrain, Const.Tile.Type.Grain) -- Grain nodes
+    self:_pickCentres(points, nWoodland+nGrain+1, nPoints, Const.Tile.Type.Grass) -- Grass nodes
+
+    -- now iterate the tile map and populate tiles based on centres
+    for y=1, #self.Tiles do
+        for x=1, self.Width do
+            if self.Tiles[y][x] == nil then -- don't overwrite the river
+                self.Tiles[y][x] = Tile(x, y, self:_getNearestCentreType(points, x, y))
+            end
+        end
+    end
+end
+
+
+-- callbacks
+
+function Map:draw()
+    for y=1, #self.Tiles do
+        for x=1, #self.Tiles[y] do
+            self.Tiles[y][x]:draw()
+        end
+    end
+end
+
+
+-- Helpers
 
 function Map:_clear()
     for y=1, self.Height do
@@ -130,49 +179,6 @@ function Map:_generateRiver()
 
     -- go!
     nextRiverTile(self:_getRiverStart(dir), dir, dir)
-end
-
-function Map:Generate()
-    self:_clear()
-    
-    self:_generateRiver() --river first
-
-    -- then distribute grass, woodland and grain
-    
-    -- we'll use n points, in our defined ratio, as randomly picked (non-river) centres
-    -- then voronoi distribution against these nodes for the rest
-    -- then weighting of the center points should guarantee the weighting we want in the final map
-    
-    -- keep a dictionary of points so we can check if that location is already one
-    -- also keep a list we can iterate to find the nearest, as this will be more efficient
-    local nPoints = Const.Map.Centres
-    points = {} --we can use the same table for the dictionary and the list, because lua
-    for i=1, self.Height > nPoints and self.Height or nPoints do
-        points[i] = {}
-    end
-
-    local nWoodland, nGrain = Const.Map.Woodland / 100 * nPoints, Const.Map.Grain / 100 * nPoints
-
-    self:_pickCentres(points, 1, nWoodland, Const.Tile.Type.Woodland) -- Woodland nodes
-    self:_pickCentres(points, nWoodland +1, nWoodland+nGrain, Const.Tile.Type.Grain) -- Grain nodes
-    self:_pickCentres(points, nWoodland+nGrain+1, nPoints, Const.Tile.Type.Grass) -- Grass nodes
-
-    -- now iterate the tile map and populate tiles based on centres
-    for y=1, #self.Tiles do
-        for x=1, self.Width do
-            if self.Tiles[y][x] == nil then -- don't overwrite the river
-                self.Tiles[y][x] = Tile(x, y, self:_getNearestCentreType(points, x, y))
-            end
-        end
-    end
-end
-
-function Map:draw()
-    for y=1, #self.Tiles do
-        for x=1, #self.Tiles[y] do
-            self.Tiles[y][x]:draw()
-        end
-    end
 end
 
 return Map
