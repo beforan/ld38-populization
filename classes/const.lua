@@ -1,4 +1,7 @@
 return {
+    Game = {
+        Players = 2
+    },
     Tile = {
         Size = 10,
         Type = {
@@ -24,6 +27,12 @@ return {
             East = 2,
             South = 3,
             West = 4
+        },
+        Quadrant = {
+            NW = 1,
+            NE = 2,
+            SE = 3,
+            SW = 4
         },
         RiverStartZone = 60 -- central percentage of an edge the river can start in
     }

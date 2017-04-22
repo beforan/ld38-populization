@@ -16,6 +16,22 @@ local Map = Class {
 
 -- "public" methods
 
+function Map:Spawn()
+    local excludeQ = {}
+    for i=1, Const.Game.Players do
+        local done = false
+        while not done do
+            local q = self:_getRandomQuadrant(excludeQ)
+            local pos = self:_getRandomTile(q)
+            if self.Tiles[pos.y][pos.x].Buildable then
+                self.Tiles[pos.y][pos.x].House = true --replace with object ref
+                table.insert(excludeQ, q)
+                done = true
+            end
+        end
+    end
+end
+
 function Map:Generate()
     self:_clear()
     
@@ -71,6 +87,15 @@ function Map:_clear()
     end
 end
 
+function Map:_getRandomTile(quad)
+    local q, xMin, yMin, xMax, yMax = Const.Map.Quadrant, 1, 1, self.Width, self.Height
+    if     quad == q.NW then xMax, yMax = self.Width / 2, self.Height / 2
+    elseif quad == q.NE then xMin, yMax = self.Width / 2, self.Height / 2
+    elseif quad == q.SE then xMin, yMin = self.Width / 2, self.Height / 2
+    elseif quad == q.SW then xMax, yMin = self.Width / 2, self.Height / 2 end
+    return { x = math.random(xMin, xMax), y = math.random(yMin, yMax) }
+end
+
 function Map:_pickCentres(points, start, limit, type)
     for i=start, limit do
         local pick = true
@@ -106,6 +131,16 @@ end
 
 function Map:_getRandomMapDirection()
     return math.random(4)
+end
+function Map:_getRandomQuadrant(excludeQ)
+    local result
+    while not result do --yay, hideously inefficient! but few values, so whatever
+        result = math.random(4)
+        for _, v in ipairs(excludeQ) do
+            if result == v then result = nil end
+        end
+    end
+    return result
 end
 
 function Map:_isNorthSouth(dir)
