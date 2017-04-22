@@ -23,8 +23,7 @@ function Map:Spawn()
         while not done do
             local q = self:_getRandomQuadrant(excludeQ)
             local pos = self:_getRandomTile(q)
-            if self.Tiles[pos.y][pos.x].Buildable then
-                self.Tiles[pos.y][pos.x].House = true --replace with object ref
+            if self.Tiles[pos.y][pos.x]:BuildHouse(i) then
                 table.insert(excludeQ, q)
                 done = true
             end

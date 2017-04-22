@@ -1,5 +1,6 @@
 local Class = require "lib.hump.class"
 local Const = require "classes.const"
+local House = require "classes.house"
 
 local Tile = Class {
     init = function(self, x, y, type)
@@ -31,6 +32,13 @@ function Tile:draw()
     love.graphics.rectangle("fill", self:GetBoundingBox())
 
     love.graphics.setColor(255, 255, 255, 255) -- reset
+end
+
+function Tile:BuildHouse(player, type)
+    if not self:Buildable() then return false end
+    self.House = House(player, type)
+    table.insert(PlayerHouses[player], self.House)
+    return self.House
 end
 
 function Tile:GetBoundingBox()

@@ -3,7 +3,7 @@ return {
         Players = 2
     },
     Tile = {
-        Size = 10,
+        Size = 12,
         Type = {
             Grass = "Grass",
             Woodland = "Woodland",
@@ -13,8 +13,17 @@ return {
             Riverside = "Riverside"
         }
     },
+    House = {
+        Type = {
+            Standard = "Standard",
+            Builder = "Builder",
+            Lumberjack = "Lumberjack",
+            Farmer = "Farmer",
+            Fisher = "Fisher"
+        }
+    },
     Map = {
-        Width = 50,
+        Width = 90,
         Height = 50,
         -- these are ratios of tiles for woodland and grain
         -- for the tiles remaining after the river (and riverside)
