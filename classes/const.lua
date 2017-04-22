@@ -18,6 +18,12 @@ return {
         -- everything else if grass
         Woodland = 20,
         Grain = 20,
-        Centres = 100 -- how many centre nodes used for procgen
+        Centres = 100, -- how many centre nodes used for procgen
+        Direction = {
+            North = 1,
+            East = 2,
+            South = 3,
+            West = 4
+        }
     }
 }

@@ -55,20 +55,43 @@ function Map:_getNearestCentreType(points, x, y)
     return points[r.y][r.x]
 end
 
+function Map:_getRandomMapDirection()
+    return math.random(4)
+end
+
+function Map:_isNorthSouth(dir)
+    return (dir == Const.Map.Direction.North or dir == Const.Map.Direction.South)
+end
+
+function Map:_isEastWest(dir)
+    return (dir == Const.Map.Direction.East or dir == Const.Map.Direction.West)
+end
+
+function Map:_getRiverStart(dir)
+    local x, y = 1, 1
+    if(self:_isEastWest(dir)) then y = math.random(self.Height) -- pick a random y for horizontal
+    else x = math.random(self.Width) end -- or a random x for vertical
+    -- handle the directions that don't the perpendicular coord as 1
+    if(dir == Const.Map.Direction.North) then y = self.Height end
+    if(dir == Const.Map.Direction.West) then y = self.Width end
+    return { x = x, y = y }
+end
+
 function Map:Generate()
     self:_clear()
     
     -- River first
 
-    --pick a direction
-    local riverDir = math.random(2)
-    -- pick an coord
-    local riverPos = riverDir == 1 and math.random(self.Width) or math.random(self.Height)
+    -- pick a direction
+    local riverDir = self:_getRandomMapDirection()
+
+    -- pick a start coord based on intended direction
+    local riverStart = self:_getRiverStart(riverDir)
 
     -- straight river ;)
     for p=1, #self.Tiles do
-        local x = riverDir == 1 and riverPos or p
-        local y = riverDir == 2 and riverPos or p
+        local x = self:_isNorthSouth(riverDir) and riverStart.x or p
+        local y = self:_isEastWest(riverDir) and riverStart.y or p
         self.Tiles[y][x] = Tile(x, y, Const.Tile.Type.River)
     end
 
