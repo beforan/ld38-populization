@@ -1,9 +1,14 @@
 return {
+    Ui = {
+        SideBar = 200, -- width in px
+        StatusBar = 30, -- height in px
+        CameraScroll = 10
+    },
     Game = {
         Players = 2
     },
     Tile = {
-        Size = 12,
+        Size = 32,
         Type = {
             Grass = "Grass",
             Woodland = "Woodland",
