@@ -165,7 +165,7 @@ function Map:_getRiverStart(dir)
     end
     -- handle the directions that don't the perpendicular coord as 1
     if dir == Const.Map.Direction.North then y = self.Height end
-    if dir == Const.Map.Direction.West then y = self.Width end
+    if dir == Const.Map.Direction.West then x = self.Width end
     return { x = x, y = y }
 end
 
