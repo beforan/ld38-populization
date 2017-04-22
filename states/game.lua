@@ -79,4 +79,12 @@ function Game:keypressed(key)
     end
 end
 
+function Game:wheelmoved(x, y)
+    if y > 0 then
+        if self.Camera.scale < 2 then self.Camera:zoom(1.1) end
+    elseif y < 0 then
+        if self.Camera.scale > .4 then self.Camera:zoom(0.9) end
+    end
+end
+
 return Game
