@@ -23,7 +23,7 @@ function Map:Spawn()
         while not done do
             local q = self:_getRandomQuadrant(excludeQ)
             local pos = self:_getRandomTile(q)
-            if self.Tiles[pos.y][pos.x]:BuildHouse(v, Params.Game.StartingPop) then
+            if self.Tiles[pos.y][pos.x]:BuildHouse(v, Params.Game.Start.Pop) then
                 table.insert(excludeQ, q)
                 done = true
             end

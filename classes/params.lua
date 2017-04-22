@@ -1,3 +1,15 @@
+-- this is a bit of a weird table;
+-- it's a catch-all for non-variable parameters that define game behaviour,
+-- providing a single point of truth for a lot of mechanics, to avoid magic numbers,
+-- but it also contains some enums to avoid magic strings...
+--
+-- as such, some values (mostly mechanics-y numbers) can be changed without breaking things,
+-- just changing the game balance
+-- but other things (like Type enums) are tied into other settings elsewhere (like assets)
+-- so shouldn't be changed
+--
+-- oh well, game jams, amirite?
+
 return {
     Ui = {
         SideBar = 200, -- width in px
@@ -15,8 +27,11 @@ return {
             [1] = "Blue",
             [2] = "Red"
         },
-        StartingFood = 50,
-        StartingPop = 4,
+        Start = {
+            Food = 50,
+            Lumber = 50,
+            Pop = 4
+        },
         BuildTrigger = 4
     },
     Tile = {

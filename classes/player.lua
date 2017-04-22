@@ -9,7 +9,8 @@ local Player = Class {
     end,
     Houses = {},
     Vitalstatistix = {
-        Food = Params.Game.StartingFood
+        Food = Params.Game.Start.Food,
+        Lumber = Params.Game.Start.Lumber
     }
 }
 
