@@ -24,6 +24,7 @@ return {
             East = 2,
             South = 3,
             West = 4
-        }
+        },
+        RiverStartZone = 60 -- central percentage of an edge the river can start in
     }
 }

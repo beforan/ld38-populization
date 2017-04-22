@@ -68,32 +68,74 @@ function Map:_isEastWest(dir)
 end
 
 function Map:_getRiverStart(dir)
+    local deadzone = (100 - Const.Map.RiverStartZone / 2) --we don't want to start too near a corner as it increases the chances of dumb rivers
     local x, y = 1, 1
-    if(self:_isEastWest(dir)) then y = math.random(self.Height) -- pick a random y for horizontal
-    else x = math.random(self.Width) end -- or a random x for vertical
+    if self:_isEastWest(dir) then
+        y = math.random(
+            self.Height * deadzone / 100,
+            self.Height * (100 - deadzone) / 100) -- pick a random y for horizontal
+    else
+        x = math.random(
+            self.Width * deadzone / 100,
+            self.Width * (100 - deadzone) / 100) -- or a random x for vertical
+    end
     -- handle the directions that don't the perpendicular coord as 1
-    if(dir == Const.Map.Direction.North) then y = self.Height end
-    if(dir == Const.Map.Direction.West) then y = self.Width end
+    if dir == Const.Map.Direction.North then y = self.Height end
+    if dir == Const.Map.Direction.West then y = self.Width end
     return { x = x, y = y }
+end
+
+function Map:_outOfBounds(posx, y)
+    local x
+    if type(posx) == "table" then
+        x, y = posx.x, posx.y
+    else x = posx end
+
+    if self.Tiles[y] == nil then return true end
+    if x < 1 or x > self.Width then return true end --can't nil check x because it may not be populated yet
+    return false
+end
+
+function Map:_getOppositeDir(dir)
+    if dir == Const.Map.Direction.North then return Const.Map.Direction.South end
+    if dir == Const.Map.Direction.South then return Const.Map.Direction.North end
+    if dir == Const.Map.Direction.West then return Const.Map.Direction.East end
+    if dir == Const.Map.Direction.East then return Const.Map.Direction.West end
+end
+
+function Map:_generateRiver()
+    --we'll use this recursively to plot the river
+    local function nextRiverTile(pos, oldDir, favourDir)
+        print(pos.x, pos.y, self:_outOfBounds(pos))
+        self.Tiles[pos.y][pos.x] = Tile(pos.x, pos.y, Const.Tile.Type.River) --render the current tile
+        --then choose the next tile
+        local dir = Map:_getRandomMapDirection()
+        if dir == self:_getOppositeDir(oldDir) then dir = favourDir end -- can't double back on ourselves; use this to weight the favoured direction
+        if dir == self:_getOppositeDir(favourDir) then dir = favourDir end -- also can't go back towards the start (river flowing uphill?)
+
+        if dir == Const.Map.Direction.North then pos.y = pos.y - 1 end
+        if dir == Const.Map.Direction.South then pos.y = pos.y + 1 end
+        if dir == Const.Map.Direction.East then pos.x = pos.x + 1 end
+        if dir == Const.Map.Direction.West then pos.x = pos.x - 1 end
+
+        print(pos.x, pos.y, self:_outOfBounds(pos))
+
+        if not self:_outOfBounds(pos) then
+            nextRiverTile(pos, dir, favourDir)
+        end
+    end
+
+    -- pick a direction
+    local dir = self:_getRandomMapDirection()
+
+    -- go!
+    nextRiverTile(self:_getRiverStart(dir), dir, dir)
 end
 
 function Map:Generate()
     self:_clear()
     
-    -- River first
-
-    -- pick a direction
-    local riverDir = self:_getRandomMapDirection()
-
-    -- pick a start coord based on intended direction
-    local riverStart = self:_getRiverStart(riverDir)
-
-    -- straight river ;)
-    for p=1, #self.Tiles do
-        local x = self:_isNorthSouth(riverDir) and riverStart.x or p
-        local y = self:_isEastWest(riverDir) and riverStart.y or p
-        self.Tiles[y][x] = Tile(x, y, Const.Tile.Type.River)
-    end
+    self:_generateRiver() --river first
 
     -- then distribute grass, woodland and grain
     
@@ -130,13 +172,6 @@ function Map:draw()
         for x=1, #self.Tiles[y] do
             self.Tiles[y][x]:draw()
         end
-    end
-
-    for i=1, Const.Map.Centres do
-        local p = points[i].point
-        love.graphics.setColor(255, 0, 0, 255)
-        love.graphics.rectangle("fill", (p.x-1) * Const.Tile.Size + Const.Tile.Size / 2 - 1, (p.y-1) * Const.Tile.Size + Const.Tile.Size / 2 - 1, 2, 2)
-        love.graphics.setColor(255, 255, 255, 255)
     end
 end
 
