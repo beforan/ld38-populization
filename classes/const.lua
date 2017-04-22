@@ -1,3 +1,7 @@
 return {
-    tileSize = 16
+    TileSize = 32,
+    Map = {
+        Width = 50,
+        Height = 50
+    }
 }
