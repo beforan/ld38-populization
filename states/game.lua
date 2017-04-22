@@ -2,17 +2,18 @@ local Camera = require "lib.hump.camera"
 
 local Map = require "classes.map"
 local Const = require "classes.const"
+local Player = require "classes.player"
 
 local Game = {}
-
-PlayerHouses = {} -- ugh, fix this
 
 function Game:init()
     love.keyboard.setKeyRepeat(true)
     
     -- init player data
-    for i=1, Const.Game.Players do
-        PlayerHouses[i] = {}
+    self.Players = {}
+    for i, v in ipairs(Const.Game.Players) do
+        self.Players[i] = Player(v) -- index it
+        self.Player[v] = self.Players[i] -- and key it
     end
 
     -- init map

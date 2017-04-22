@@ -1,6 +1,7 @@
 local Class = require "lib.hump.class"
 local Const = require "classes.const"
 local House = require "classes.house"
+local Assets = require "assets.assets"
 
 local Tile = Class {
     init = function(self, x, y, type)
@@ -17,21 +18,18 @@ local Tile = Class {
 }
 
 function Tile:draw()
-    
-    if self.House then -- set colour based on house sprite
-        love.graphics.setColor(0, 0, 0, 255)
-    else -- set colour (sprite later?) based on type
-        if self.Type == Const.Tile.Type.Grass then love.graphics.setColor(76, 153, 0, 255) end
-        if self.Type == Const.Tile.Type.Woodland then love.graphics.setColor(0, 102, 51, 255) end
-        if self.Type == Const.Tile.Type.Deforested then love.graphics.setColor(139, 69, 19, 255) end
-        if self.Type == Const.Tile.Type.Grain then love.graphics.setColor(245, 222, 179, 255) end
-        if self.Type == Const.Tile.Type.River then love.graphics.setColor(0, 76, 153, 255) end
-        if self.Type == Const.Tile.Type.Riverside then love.graphics.setColor(51, 102, 0, 255) end
-    end
-    
-    love.graphics.rectangle("fill", self:GetBoundingBox())
+    local x, y = self:GetBoundingBox() -- if we need them this way
 
-    love.graphics.setColor(255, 255, 255, 255) -- reset
+    if self.Type == Const.Tile.Type.Grass       then love.graphics.draw(Assets.Sprites.Grass, x, y) end
+    if self.Type == Const.Tile.Type.Woodland    then love.graphics.draw(Assets.Sprites.Woodland, x, y) end
+    if self.Type == Const.Tile.Type.Deforested  then love.graphics.setColor(139, 69, 19, 255) end
+    if self.Type == Const.Tile.Type.Grain       then love.graphics.draw(Assets.Sprites.Grain, x, y) end
+    if self.Type == Const.Tile.Type.River       then love.graphics.draw(Assets.Sprites.River, x, y) end
+    if self.Type == Const.Tile.Type.Riverside   then love.graphics.draw(Assets.Sprites.Riverside, x, y) end
+
+    if self.House then
+        self.House:draw()
+    end
 end
 
 function Tile:BuildHouse(player, type)

@@ -7,11 +7,14 @@ return {
         ScrollSpeed = 10,
         ZoomIncrement = 1.1,
         ZoomExcrement = 0.9, -- couldn't resist
-        MinZoom = 0.4,
-        MaxZoom = 3
+        MinZoom = 0.9,
+        MaxZoom = 2
     },
     Game = {
-        Players = 2
+        Players = {
+            [1] = "Blue",
+            [2] = "Red"
+        }
     },
     Tile = {
         Size = 32,

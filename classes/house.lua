@@ -8,4 +8,8 @@ local House = Class {
     end
 }
 
+function House:draw()
+    love.graphics.draw(owner.Sprites.Standard, x, y)
+end
+
 return House
