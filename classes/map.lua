@@ -152,11 +152,36 @@ function Map:_getOppositeDir(dir)
     if dir == Const.Map.Direction.East then return Const.Map.Direction.West end
 end
 
+function Map:_getAdjacent(posx, y)
+    local results = {}    
+    local x
+    if type(posx) == "table" then
+        x, y = posx.x, posx.y
+    else x = posx end
+
+    for dx = -1, 1 do
+        for dy = -1, 1 do
+            if not self:_outOfBounds(x + dx, y + dy) then
+                table.insert(results, { x = x + dx, y = y + dy })
+            end
+        end
+    end
+
+    return results
+end
+
 function Map:_generateRiver()
     --we'll use this recursively to plot the river
     local function nextRiverTile(pos, oldDir, favourDir)
-        print(pos.x, pos.y, self:_outOfBounds(pos))
         self.Tiles[pos.y][pos.x] = Tile(pos.x, pos.y, Const.Tile.Type.River) --render the current tile
+
+        -- set all adjacent tiles to riverside
+        for _, v in ipairs(self:_getAdjacent(pos)) do
+            if not self.Tiles[v.y][v.x] then
+                self.Tiles[v.y][v.x] = Tile(v.x, v.y, Const.Tile.Type.Riverside)
+            end
+        end
+
         --then choose the next tile
         local dir = Map:_getRandomMapDirection()
         if dir == self:_getOppositeDir(oldDir) then dir = favourDir end -- can't double back on ourselves; use this to weight the favoured direction
@@ -166,8 +191,6 @@ function Map:_generateRiver()
         if dir == Const.Map.Direction.South then pos.y = pos.y + 1 end
         if dir == Const.Map.Direction.East then pos.x = pos.x + 1 end
         if dir == Const.Map.Direction.West then pos.x = pos.x - 1 end
-
-        print(pos.x, pos.y, self:_outOfBounds(pos))
 
         if not self:_outOfBounds(pos) then
             nextRiverTile(pos, dir, favourDir)
