@@ -102,9 +102,10 @@ function Map:GetAdjacentTile(posx, diry, dir)
     if dir == Params.Map.Direction.East then dx, dy = 1, 0 end
     if dir == Params.Map.Direction.West then dx, dy = -1, 0 end
 
-    if not self:OutOfBounds(x + dx, y + dy) and not (dx == 0 and dy == 0) then
+    if not self:OutOfBounds(x + dx, y + dy) then
         return self.Tiles[y + dy][x + dx]
     end
+    return nil
 end
 
 function Map:GetAdjacentCoords(posx, y)

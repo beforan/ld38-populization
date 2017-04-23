@@ -82,7 +82,9 @@ local Params = {
                 HungryModifier = 1
             },
             Build = {
-                Cost = 10
+                Cost = 10,
+                Tick = 1, -- building occurs naturally, but faster when modified
+                BuilderModifier = 1
             }
         }
     },

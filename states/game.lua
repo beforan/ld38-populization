@@ -163,9 +163,12 @@ function Game:_tick(dt)
 
             -- eligibility for building or gathering from
             if not house.Surrounded then
-                house.CheckSurrounded() -- in case we or somebody nearby built last tick
-                table.insert(lumberDens, house)
-                table.insert(buildDens, house)
+                house:CheckSurrounded() -- in case we or somebody nearby built last tick
+                print(house.Surrounded)
+                if not house.Surrounded then --still good?
+                    table.insert(lumberDens, house)
+                    table.insert(buildDens, house)
+                end
             end
         end
 
@@ -187,8 +190,14 @@ function Game:_tick(dt)
             }
         end
         -- update build progress
+        buildProgress = buildProgress + Params.Game.Progress.Build.Tick
+        buildProgress = buildProgress + builders * Params.Game.Progress.Build.BuilderModifier
+        -- modifiers to buildCost?
         if buildProgress > buildCost then
-
+            local den = buildDens[math.random(#buildDens)]
+            den:BuildHouse(player)
+            housing = housing + Params.Game.Population.HouseCapacity
+            buildProgress = 0
         end
 
         -- growth?

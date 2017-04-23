@@ -45,4 +45,10 @@ function GameOver:draw()
     love.graphics.print(self.GameOver.Reason or "Who knows why?", 500, 500)
 end
 
+function GameOver:keyreleased(key)
+	if(key == "escape") then
+		Gamestate.switch(Gamestate.States.Game) -- start a new game
+	end
+end
+
 return GameOver
