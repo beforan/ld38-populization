@@ -17,3 +17,8 @@ end
 function math.clamp(x, min, max)
   return x < min and min or (x > max and max or x)
 end
+
+function love.keyboard.allDown(k, ...)
+    if not k then return true end
+    return love.keyboard.isDown(k) and love.keyboard.allDown(...)
+end
