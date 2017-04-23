@@ -22,6 +22,7 @@ return {
         Population = utf8.char(0xf0c0),
         InfoCircle = utf8.char(0xf05a),
         Food = utf8.char(0xf0f5),
-        Lumber = utf8.char(0xf1bb)
+        Lumber = utf8.char(0xf1bb),
+        Selected = utf8.char(0xf00c)
     }
 }

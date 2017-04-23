@@ -17,6 +17,7 @@ local Map = Class {
 -- "public" methods
 
 function Map:Hover(posx, y)
+    if not posx then self.HoverTile = nil; return end
     local x
     if type(posx) == "table" then
         x, y = posx.x, posx.y
@@ -29,6 +30,7 @@ function Map:Hover(posx, y)
 end
 
 function Map:Select(posx, y)
+    if not posx then self.SelectedTile = nil; return end
     local x
     if type(posx) == "table" then
         x, y = posx.x, posx.y

@@ -104,6 +104,7 @@ function Game:_keyScroll(dt)
     if love.keyboard.isDown("right") then
         self.Camera:move(Params.Camera.ScrollSpeed * dt, 0)
     end
+    self:mousemoved(love.mouse.getPosition()) --well, it did move in the game world
 end
 
 function Game:_mouseScroll(dt)
@@ -125,6 +126,7 @@ function Game:_mouseScroll(dt)
         and y > cameraViewPort.y and x > cameraViewPort.x then
         self.Camera:move(-Params.Camera.ScrollSpeed * dt, 0)
     end
+    self:mousemoved(x, y) --well, it did move in the game world
 end
 
 function Game:keypressed(key)
@@ -144,11 +146,13 @@ function Game:wheelmoved(x, y)
         if self.Camera.scale < Params.Camera.MaxZoom then
             self.Camera:zoom(Params.Camera.ZoomIncrement)
             self.Camera:move(zoomVector.x, zoomVector.y)
+            self:mousemoved(love.mouse.getPosition()) --well, it did move in the game world
         end
     elseif y < 0 then
         if self.Camera.scale > Params.Camera.MinZoom then
             self.Camera:zoom(Params.Camera.ZoomExcrement)
             self.Camera:move(zoomVector.x, zoomVector.y)
+            self:mousemoved(love.mouse.getPosition()) --well, it did move in the game world
         end
     end
     self.Map:Hover(self:vMousePosition())
@@ -158,15 +162,16 @@ function Game:mousereleased(x, y, b)
     local mx, my = self:vMousePosition()
 
     -- move camera
-    if b == 3 then self.Camera:lookAt(mx, my) end
+    if b == 3 then
+        self.Camera:lookAt(mx, my)
+        self:mousemoved(love.mouse.getPosition()) --well, it did move in the game world
+    end
 
     -- select a tile
     if b == 1 then
         if x > cameraViewPort.x and x < cameraViewPort.x + cameraViewPort.w
             and y > cameraViewPort.y and y < cameraViewPort.y + cameraViewPort.h then
             self.Map:Select(mx, my)
-        else
-            self.Map:Select(-1, -1) -- force a "deselect" by passing out of bounds coords
         end
     end
 end
@@ -176,19 +181,13 @@ function Game:mousemoved(x, y)
         and y > cameraViewPort.y and y < cameraViewPort.y + cameraViewPort.h then
         self.Map:Hover(self:vMousePosition())
     else
-        self.Map:Hover(-1, -1) -- force an "unhover" by passing out of bounds coords
+        self.Map:Hover() --hover nothing is effectively no hover
     end
 end
 
 -- camera viewport offset helpers
-function Game:vCameraCoords()
-    return self.Camera:cameraCoords(cameraViewPort.x, cameraViewPort.y, cameraViewPort.w, cameraViewPort.h)
-end
 function Game:vMousePosition()
     return self.Camera:mousePosition(cameraViewPort.x, cameraViewPort.y, cameraViewPort.w, cameraViewPort.h)
-end
-function Game:vWorldCoords()
-    return self.Camera:worldCoords(cameraViewPort.x, cameraViewPort.y, cameraViewPort.w, cameraViewPort.h)
 end
 
 return Game

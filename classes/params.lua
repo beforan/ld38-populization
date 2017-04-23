@@ -12,14 +12,23 @@
 
 return {
     Ui = {
+        TextColours = {
+            Title = { 180, 180, 255, 255 },
+            Good = { 180, 255, 180, 255 },
+            Warning = { 255, 240, 150, 255 },
+            Bad = { 255, 180, 180, 255 },
+            Text = { 255, 255, 255, 255 }
+        },
         IconWidth = 40,
+        ButtonHeight = 40,
+        TipHeight = 200,
         SideBar = { --suit layout definition
             Colour = { 64, 96, 128, 255 },
             Width = 200,
             min_height = 670, -- window height - statusbar height
             pos = { 0, 30 }, --y should be the height of the statusbar
             padding = { 10, 10 },
-            { 200, 200 }, --info tip
+            { 200, 200 }, --info tip (width should match SideBar, height should match TipHeight)
             { nil, "fill"}, -- selected item area
             { nil, 50 } -- menu button?
         },
