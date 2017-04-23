@@ -74,6 +74,8 @@ function Game:update(dt)
     self:_keyScroll(dt)
     self:_mouseScroll(dt)
     self:_clampCamera()
+
+    self.Ui:update(dt)
 end
 
 function Game:_toggleDebugStats()

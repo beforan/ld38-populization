@@ -3,31 +3,34 @@ local Suit = require "lib.suit"
 local Assets = require "assets.assets"
 local Params = require "classes.params"
 
-local status
+local tooltip
+local infotip
 
 local Ui = Class {}
 
-function Ui:_drawStatus()
-    -- Population
-    love.graphics.setFont(Assets.Fonts.StatusIcons)
-    love.graphics.print(Assets.Icons.Population, 10, 10)
-    love.graphics.setFont(Assets.Fonts.Default)
-    love.graphics.print(Gamestate.current().Players[1].VitalStatistix.Population, 30, 10)
-end
+function Ui:_infoTip(x, y, w, h, padx, pady)
+    infotip = {
+        x = x + padx,
+        y = y + pady,
+        w = w - padx * 2,
+        h = h - padx * 2,
+        contentw = w - padx * 4,
+        titlex = x + padx * 2,
+        titley = y + pady * 2,
+        iconMargin = 20,
+        contentx = x + padx * 2,
+        contenty = y + pady * 2 + 20 -- offset from the title too
+    }
 
-function Ui:_drawInfoTip()
-    -- background
-    love.graphics.setColor(0, 0, 0, 100)
-    love.graphics.rectangle("fill", 10, Params.Ui.StatusBar.Height + 10, Params.Ui.SideBar.Width - 20, 200)
-    love.graphics.setColor(255, 255, 255, 255)
+    local tooltipText = "This area provides useful information on elements of the game world and the user interface!"
 
-    --title
-    love.graphics.setFont(Assets.Fonts.StatusIcons)
-    love.graphics.print(Assets.Icons.InfoCircle, 20, Params.Ui.StatusBar.Height + 20)
-    love.graphics.setFont(Assets.Fonts.Default)
-    love.graphics.print("Information", 40, Params.Ui.StatusBar.Height + 20)
-
-    --infotip
+    --provide an empty Suit widget just for input handling ;)
+    Suit.layout:push(infotip.x, infotip.y)
+    if Suit.Label("", Suit.layout:row(infotip.w, infotip.h)).hovered then
+        tooltip = tooltipText end
+    Suit.layout:pop()
+    
+    -- get the content
     local gs = Gamestate.current()
     local map = gs.Map
     local cTitle = { 180, 180, 255, 255 }
@@ -76,25 +79,162 @@ function Ui:_drawInfoTip()
             table.insert(text, cText)
             table.insert(text, "I'm a homestead!\n") --add house counts?
         end
+    else
+        if tooltip then
+            text = tooltip
+        end
     end
 
-    love.graphics.printf(text, 20, Params.Ui.StatusBar.Height + 40, Params.Ui.SideBar.Width - 40)
+    infotip.text = text
+end
+
+function Ui:_drawInfoTip()
+    -- background
+    love.graphics.setColor(0, 0, 0, 100)
+    love.graphics.rectangle("fill", infotip.x, infotip.y, infotip.w, infotip.h)
+    love.graphics.setColor(255, 255, 255, 255)
+
+    --title
+    love.graphics.setFont(Assets.Fonts.StatusIcons)
+    love.graphics.print(Assets.Icons.InfoCircle, infotip.titlex, infotip.titley)
+    love.graphics.setFont(Assets.Fonts.Default)
+    love.graphics.print("Information", infotip.titlex + infotip.iconMargin, infotip.titley)
+
+    -- content
+    love.graphics.printf(infotip.text, infotip.contentx, infotip.contenty, infotip.contentw)
 end
 
 function Ui:draw()
     --background for ui zones
-    love.graphics.setColor(64, 64, 64, 255)
+    love.graphics.setColor(unpack(Params.Ui.SideBar.Colour))
     love.graphics.rectangle("fill", 0, Params.Ui.StatusBar.Height, Params.Ui.SideBar.Width, love.graphics.getHeight() - Params.Ui.StatusBar.Height)
-    love.graphics.setColor(32, 32, 32, 255)
+    love.graphics.setColor(unpack(Params.Ui.StatusBar.Colour))
     love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), Params.Ui.StatusBar.Height)
     love.graphics.setColor(255, 255, 255, 255)
-    
-    self:_drawStatus()
-    self:_drawInfoTip()
+
+    Suit.draw()
+    self:_drawInfoTip() -- not a widget so Suit won't draw it
 end
 
 function Ui:update(dt)
+    Suit.layout:reset()
+    tooltip = nil
 
+    local statusBar = Suit.layout:cols(Params.Ui.StatusBar)
+    self:_statusBar(statusBar)
+
+    local sideBar = Suit.layout:rows(Params.Ui.SideBar)
+    self:_sideBar(sideBar)
+end
+
+function Ui:_statusBar(layout)
+    self:_population(layout:cell(1))
+    self:_food(layout:cell(2))
+    self:_lumber(layout:cell(3))
+end
+
+function Ui:_sideBar(layout)
+    local infoCell = layout[1]
+    self:_infoTip(
+        infoCell[1], infoCell[2],
+        infoCell[3], infoCell[4],
+        unpack(Params.Ui.SideBar.padding))
+    self:_selectedInfo(layout:cell(2))
+    self:_menu(layout:cell(3))
+end
+
+function Ui:_selectedInfo(x, y, w, h)
+    -- Suit.layout:push(x, y)
+    
+    -- Suit.layout:pop()
+end
+function Ui:_menu(x, y, w, h)
+    Suit.layout:push(x, y)
+    
+    local tooltipText = "Open the pause menu"
+
+    local button = Suit.Button("Menu", Suit.layout:row(w, h))
+
+    if button.hovered then tooltip = tooltipText end
+
+    if button.hit then Gamestate.push(Gamestate.States.Pause, self) end
+    
+    Suit.layout:pop()
+end
+
+function Ui:_population(x, y, w, h)
+    Suit.layout:push(x, y)
+    
+    local id = "statusPop" --abuse same id to only writ the handler once in spite of multiple widgets
+    local tooltipText = "Population"
+
+    Suit.Label(Assets.Icons.Population,
+        {
+            id = id,
+            align = "center",
+            font = Assets.Fonts.StatusIcons
+        },
+        Suit.layout:col(Params.Ui.IconWidth, h))
+    
+    if Suit.Label(Gamestate.current().Players[1].VitalStatistix.Population,
+        {
+            id = id,
+            align = "left"
+        },
+        Suit.layout:col(w - Params.Ui.IconWidth, h))
+    .hovered then tooltip = tooltipText end
+    
+    Suit.layout:pop()
+end
+
+function Ui:_food(x, y, w, h)
+    Suit.layout:push(x, y)
+    
+    local id = "statusFood" --abuse same id to only writ the handler once in spite of multiple widgets
+    local tooltipText = "Food"
+
+    Suit.Label(Assets.Icons.Food,
+        {
+            id = id,
+            align = "center",
+            font = Assets.Fonts.StatusIcons
+        },
+        Suit.layout:col(Params.Ui.IconWidth, h))
+    
+    if Suit.Label(Gamestate.current().Players[1].VitalStatistix.Food,
+        {
+            id = id,
+            align = "left"
+        },
+        Suit.layout:col(w - Params.Ui.IconWidth, h))
+    .hovered then tooltip = tooltipText end
+    
+    Suit.layout:pop()
+end
+
+function Ui:_lumber(x, y, w, h)
+    Suit.layout:push(x, y)
+    
+    local id = "statusLumber" --abuse same id to only writ the handler once in spite of multiple widgets
+    local tooltipText = "Lumberrrrrr"
+
+    Suit.Label(Assets.Icons.Lumber,
+        {
+            id = id,
+            align = "center",
+            font = Assets.Fonts.StatusIcons
+        },
+        Suit.layout:col(Params.Ui.IconWidth, h))
+    
+    if Suit.Label(Gamestate.current().Players[1].VitalStatistix.Lumber,
+        {
+            id = id,
+            align = "left"
+        },
+        Suit.layout:col(w - Params.Ui.IconWidth, h))
+    .hovered then tooltip = tooltipText end
+    
+    Suit.layout:pop()
 end
 
 return Ui

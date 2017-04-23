@@ -20,6 +20,8 @@ return {
     },
     Icons = { --Oh god yes a unicode lookup for the fa icons i'm actually using
         Population = utf8.char(0xf0c0),
-        InfoCircle = utf8.char(0xf05a)
+        InfoCircle = utf8.char(0xf05a),
+        Food = utf8.char(0xf0f5),
+        Lumber = utf8.char(0xf1bb)
     }
 }

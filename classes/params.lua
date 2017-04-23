@@ -12,17 +12,25 @@
 
 return {
     Ui = {
+        IconWidth = 40,
         SideBar = { --suit layout definition
+            Colour = { 64, 64, 64, 255 },
             Width = 200,
+            min_height = 670, -- window height - statusbar height
             pos = { 0, 30 }, --y should be the height of the statusbar
             padding = { 10, 10 },
-            { 200, 200 } --info tip
+            { 200, 200 }, --info tip
+            { nil, "fill"}, -- selected item area
+            { nil, 50 } -- menu button?
         },
         StatusBar = { --suit layout definition
+            Colour = { 32, 32, 32, 255  },
             Height = 30,
             pos = { 0, 0 },
-            padding = { 10, 10 },
-            { 50, 30 } -- pop
+            padding = { 5, 5 },
+            { 100, 30 }, -- pop
+            { 100, 30 }, -- food
+            { 100, 30 } -- lumber
         },
         DebugStats = true
     },

@@ -2,7 +2,8 @@ Gamestate = require "lib.hump.gamestate"
 
 -- oh ho! piggyback the global GS object to avoid making a new one
 Gamestate.States = {
-    Game = require "states.game"
+    Game = require "states.game",
+    Pause = require "states.pause"
 }
 
 function love.load(arg)
