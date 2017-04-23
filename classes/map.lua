@@ -77,6 +77,36 @@ function Map:Spawn()
     end
 end
 
+function Map:GetCardinalTiles(posx, y)
+    local x
+    if type(posx) == "table" then
+        x, y = posx.x, posx.y
+    else x = posx end
+
+    local results = {}
+    for _, dir in pairs(Params.Map.Direction) do
+        table.insert(results, Map:GetAdjacentTile(x, y, dir))
+    end
+    return results
+end
+
+function Map:GetAdjacentTile(posx, diry, dir)
+    local x, y
+    if type(posx) == "table" then
+        x, y, dir = posx.x, posx.y, diry
+    else x, y = posx, diry end
+
+    local dx, dy
+    if dir == Params.Map.Direction.North then dx, dy = 0, -1 end
+    if dir == Params.Map.Direction.South then dx, dy = 0, 1 end
+    if dir == Params.Map.Direction.East then dx, dy = 1, 0 end
+    if dir == Params.Map.Direction.West then dx, dy = -1, 0 end
+
+    if not self:OutOfBounds(x + dx, y + dy) and not (dx == 0 and dy == 0) then
+        return self.Tiles[y + dy][x + dx]
+    end
+end
+
 function Map:GetAdjacentCoords(posx, y)
     local results = {}    
     local x

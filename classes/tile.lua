@@ -9,6 +9,7 @@ local Tile = Class {
         self.Y = y
         self.Type = type or Params.Tile.Type.Grass
         self.House = nil
+        self.Yield = type == Params.Tile.Type.Woodland and Params.Game.WoodlandYield or 0
     end,
     Width = Params.Tile.Size,
     Height = Params.Tile.Size,

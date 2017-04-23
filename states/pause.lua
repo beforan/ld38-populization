@@ -1,12 +1,17 @@
 local Pause = {}
 
-function Pause:enter(game)
-	self.Game = game
+function Pause:enter(from)
+    self.background = love.graphics.newImage(love.graphics.newScreenshot())
+end
+
+function Pause:leave()
+    self.background = nil
 end
 
 function Pause:draw()
-    self.Game:draw()
-    
+    --draw the "game" background
+    love.graphics.draw(self.background)
+
     --draw the pause overlay on top :)
 	local w, h = love.graphics.getWidth(), love.graphics.getHeight()
 	

@@ -8,6 +8,8 @@ local Assets = require "assets.assets"
 local Ui = require "classes.ui"
 local utf8 = require "utf8"
 
+local ticker = 0
+
 local Game = {}
 
 local cameraViewPort = { -- bounding box of the viewport
@@ -30,6 +32,9 @@ function Game:enter()
 end
 
 function Game:_newGame()
+    self.ticks = 0
+    self.GameOver = nil
+
     -- player data
     self.Players = {}
     for i, v in ipairs(Params.Game.Players) do
@@ -63,7 +68,8 @@ function Game:draw()
         local cx, cy = self.Camera:position()
 
         love.graphics.printf(
-            "Mouse: " .. mx .. ", " .. my,
+            "Mouse: " .. mx .. ", " .. my .. "\n" ..
+            "Ticks: " .. self.ticks,
             cameraViewPort.x, cameraViewPort.y, cameraViewPort.w, "right")
     end
 
@@ -71,11 +77,175 @@ function Game:draw()
 end
 
 function Game:update(dt)
+    if self.GameOver then return Gamestate.push(Gamestate.States.GameOver) end
+    
+    ticker = ticker + dt
+    
+    --run the game tick
+    if ticker >= Params.Game.Heartbeat then
+        self:_tick(dt)
+        ticker = 0
+    end
+    
     self:_keyScroll(dt)
     self:_mouseScroll(dt)
     self:_clampCamera()
 
     self.Ui:update(dt)
+end
+
+function Game:_tick(dt)
+    self.ticks = self.ticks + 1
+
+    -- so what do we do on a tick?
+
+    -- iterate through each players houses, assessing income and expenses of all resources
+    for _, player in ipairs(self.Players) do
+        -- special buildings?
+
+        -- persistent stats (not purely recalculated every frame)
+        local food, lumber = player.VitalStatistix.Food, player.VitalStatistix.Lumber
+        local growthProgress, deathProgress, buildProgress = player.Progress.Growth, player.Progress.Death, player.Progress.Build
+
+        -- general
+        local pop, housing = 0, 0
+        
+        -- specialists
+        local builders, farmers, lumberjacks = 0, 0, 0
+        
+        -- food
+        local harvest, consumption = 0, 0
+
+        -- lumber
+        local buildCost, buildSpeed, lumberDens, buildDens = Params.Game.Progress.Build.Cost, 0, {}, {}
+
+        -- growth
+        local growthCost, growthDens = Params.Game.Progress.Growth.Cost, {}
+        local deathCost, deathDens, fullHouses = Params.Game.Progress.Death.Cost, {}, {}
+        
+        -- migration
+        local destinations = {}
+
+        -- welfare
+        local happiness, hunger, disease = 0, 0, 0
+
+        -- evaluate special buildings before houses, for modifiers?
+
+        for _, house in ipairs(player.Houses) do
+            pop = pop + house.Population
+            housing = housing + Params.Game.Population.HouseCapacity
+
+            -- specialists
+            if house.Type == Params.House.Type.Lumberjack then
+                lumberjacks = lumberjacks + house.Population
+            end
+            if house.Type == Params.House.Type.Builder then
+                builders = builders + house.Population
+            end
+            if house.Type == Params.House.Type.Farmer then
+                farmers = farmers + house.Population
+            end
+
+            -- eligibility for growth
+            if house.Population > 1 and house.Population < Params.Game.Population.HouseLimit then
+                table.insert(growthDens, house)
+            end
+
+            -- eligibility for migration or death
+            if house.Population >= Params.Game.Population.HouseCapacity then
+                if house.Population == Params.Game.Population.HouseLimit then
+                    table.insert(deathDens, house)
+                else table.insert(fullHouses, house) end
+            end
+            if house.Population < Params.Game.Population.HouseCapacity then
+                table.insert(destinations, house)
+            end
+
+            -- eligibility for building or gathering from
+            if not house.Surrounded then
+                house.CheckSurrounded() -- in case we or somebody nearby built last tick
+                table.insert(lumberDens, house)
+                table.insert(buildDens, house)
+            end
+        end
+
+        -- calculate food and lumber since it affects growth and building
+        harvest = farmers * 3 -- params
+        consumption = pop + farmers + lumberjacks + builders -- params
+        food = food + harvest - consumption
+        if food < 0 then
+            hunger = math.abs(food)
+            food = 0
+        end
+        -- lumber is more complicated
+
+        -- build?
+        if #buildDens <= 0 then
+            self.GameOver = {
+                Score = true,
+                Reason = "No more room left on this small world!\n"
+            }
+        end
+        -- update build progress
+        if buildProgress > buildCost then
+
+        end
+
+        -- growth?
+        -- update growth progress
+        growthProgress = growthProgress + food
+        if #growthDens > 0 then
+            -- modifiers to growthCost?
+            if growthProgress > growthCost then
+                local den = growthDens[math.random(#growthDens)]
+                den.Population = den.Population + 1
+                pop = pop + 1
+                growthProgress = 0
+            end
+        end
+        -- death?
+        deathProgress = deathProgress + Params.Game.Progress.Death.Tick
+        deathProgress = deathProgress + hunger * Params.Game.Progress.Death.HungryModifier
+        deathProgress = deathProgress + disease * Params.Game.Progress.Death.UnhealthyModifier
+        if deathProgress > deathCost then
+            local den
+            if #deathDens > 0 then
+                den = deathDens[math.random(#deathDens)]
+            elseif #fullHouses > 0 then
+                den = fullHouses[math.random(#fullHouses)]
+            else
+                den = player.Houses[math.random(#player.Houses)]
+            end
+            if den.Population > 0 then --guess they're lucky if not, we'll try again next tick
+                den.Population = den.Population - 1
+                pop = pop - 1
+                deathProgress = 0
+                if pop == 0 then
+                    self.GameOver = {
+                        Player = player,
+                        Lose = true,
+                        Reason = "Everyone in " .. player.Colour .. " player's civilization has perished!"
+                    }
+                end -- game over
+            end
+        end
+
+        -- move house?
+        if #fullHouses > 0 and #destinations > 0 then
+
+        end
+
+        -- update woodland yield
+
+        -- then update each player's vital statistix
+        player.VitalStatistix.Population = pop
+        player.VitalStatistix.Food = food
+        
+        -- and progress
+        player.Progress.Growth = growthProgress
+        player.Progress.Death = deathProgress
+        player.Progress.Build = buildProgress
+    end
 end
 
 function Game:_toggleDebugStats()
@@ -130,13 +300,17 @@ function Game:_mouseScroll(dt)
 end
 
 function Game:keypressed(key)
+    self:_toggleDebugStats()
+end
+
+function Game:keyreleased(key)
     if key == "m" then
         print("Reticulating splines")
         self:_newGame()
         return
     end
 
-    self:_toggleDebugStats()
+    if key == "escape" then Gamestate.push(Gamestate.States.Pause) end
 end
 
 function Game:wheelmoved(x, y)

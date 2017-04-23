@@ -10,7 +10,7 @@
 --
 -- oh well, game jams, amirite?
 
-return {
+local Params = {
     Ui = {
         TextColours = {
             Title = { 180, 180, 255, 255 },
@@ -66,8 +66,25 @@ return {
             BuildTrigger = 4,
             HouseCapacity = 4,
             HouseLimit = 8
+        },
+        Heartbeat = 1, -- tick rate in seconds
+        WoodlandYield = 10,
+        Progress = {
+            Growth = {
+                Cost = 10,
+                UnhealthyModifier = -1,
+                UnhappyModifier = -1
+            },
+            Death = {
+                Cost = 20,
+                Tick = 1, -- a natural tick towards death regardless
+                UnhealthyModifier = 1,
+                HungryModifier = 1
+            },
+            Build = {
+                Cost = 10
+            }
         }
-        
     },
     Tile = {
         Size = 32,
@@ -85,8 +102,7 @@ return {
             Standard = "Standard",
             Builder = "Builder",
             Lumberjack = "Lumberjack",
-            Farmer = "Farmer",
-            Fisher = "Fisher"
+            Farmer = "Farmer"
         }
     },
     Map = {
@@ -113,3 +129,31 @@ return {
         RiverStartZone = 60 -- central percentage of an edge the river can start in
     }
 }
+
+--InfoTips (these reference other params)
+Params.Ui.InfoTips = {
+    InfoTip = "This area provides useful information on elements of the game world and the user interface!",
+    SelecTip = "Detailed information about the currently selected map tile.",
+    StatusBar = {
+        Population = "This shows your civilization's total Population.",
+        Food = "This shows your current stockpile of Food.",
+        Lumber = "This shows your current stockpile of Lumber."
+    },
+    Buttons = {
+        Menu = "Open the Pause menu. This pauses the game and offers the following options:\n\n- Quit Game",
+        Lumberjack = {
+            Params.Ui.TextColours.Text, "Turn this ",
+            Params.Ui.TextColours.Title, "Standard",
+            Params.Ui.TextColours.Text, " house into a ",
+            Params.Ui.TextColours.Title, "Lumberjack",
+            Params.Ui.TextColours.Text, " house.\n\nThis will provide ",
+            Params.Ui.TextColours.Good, "Lumber",
+            Params.Ui.TextColours.Text, " income.\n\n",
+            Params.Ui.TextColours.Good, "Lumber",
+            Params.Ui.TextColours.Text, " is used for all building actions.",
+        },
+        Cancel = "Deselect the tile without taking any action."
+    }
+}
+
+return Params

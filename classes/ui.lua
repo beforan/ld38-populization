@@ -75,18 +75,18 @@ function Ui:_infoTip(x, y, w, h)
     local padx, pady = unpack(Params.Ui.SideBar.padding)
     infotip = self:_initTip(x, y, w, h, padx, pady)
 
-    local tooltipText = "This area provides useful information on elements of the game world and the user interface!"
-
     --provide an empty Suit widget just for input handling ;)
     Suit.layout:push(infotip.x, infotip.y)
     if Suit.Label("", { id = "sidebarInfoTip" }, Suit.layout:row(infotip.w, infotip.h)).hovered then
-        tooltip = tooltipText end
+        tooltip = Params.Ui.InfoTips.InfoTip end
     Suit.layout:pop()
 
     local text = {}
 
     local gs = Gamestate.current()
     local map = gs.Map
+
+    if not map then return end -- game isn't the current state for some 
 
     local t = map.HoverTile
     if t then
@@ -131,6 +131,7 @@ function Ui:draw()
     love.graphics.setColor(255, 255, 255, 255)
 
     Suit.draw()
+
     self:_drawTip(infotip) -- not a widget so Suit won't draw it
     self:_drawTip(selectip)
 end
@@ -170,11 +171,6 @@ function Ui:_selectedInfo(x, y, w, h, padx, pady)
         
         selectip = self:_initTip(x, y, w, Params.Ui.TipHeight, padx, pady)
 
-        local tooltipText = {
-            Tip = "Detailed information about the currently selected map tile",
-            Cancel = "Deselect the tile without taking any action"
-        }
-
         selectip.icon = Assets.Icons.Selected
         selectip.title = "Selected Tile"
         selectip.text = self:_getTileContent(t)
@@ -182,46 +178,44 @@ function Ui:_selectedInfo(x, y, w, h, padx, pady)
         Suit.layout:push(selectip.x, selectip.y)
 
         --provide an empty Suit widget just for input handling ;)
-        local tip = Suit.Label("", { id = "sidebarSelecTip" }, Suit.layout:row(selectip.w, selectip.h))
+        if Suit.Label("", { id = "sidebarSelecTip" }, Suit.layout:row(selectip.w, selectip.h))
+            .hovered then tooltip = Params.Ui.InfoTips.SelecTip end
 
-        local function getNextButton() local x, y, w, h = Suit.layout:row(nil, Params.Ui.ButtonHeight); return { x, y + pady, w, h - pady } end -- save c&p-ing (or editing) this line multiple times :\
+        -- use this to modify padding, since it's broken
+        local function getNextButton() local x, y, w, h = Suit.layout:row(nil, Params.Ui.ButtonHeight); return { x, y + pady, w, h - pady } end
 
-        Suit.Button("Test button", unpack(getNextButton()))
-        Suit.Button("Test button 1", unpack(getNextButton()))
-        Suit.Button("Test button 2", unpack(getNextButton()))
-        Suit.Button("Test button 3", unpack(getNextButton()))
+
+        -- Specialists
+        local lumberjack = Suit.Button("Upgrade: Lumberjack", unpack(getNextButton()))
+        if lumberjack.hovered then tooltip = Params.Ui.InfoTips.Buttons.Lumberjack end
+        if lumberjack.hit then map:Select() end
+
+        -- Suit.Button("Test button", unpack(getNextButton()))
+        -- Suit.Button("Test button 1", unpack(getNextButton()))
+        -- Suit.Button("Test button 2", unpack(getNextButton()))
+        -- Suit.Button("Test button 3", unpack(getNextButton()))
         
         -- cancel selection
         local cancel = Suit.Button("Cancel Selection", unpack(getNextButton()))
-        if cancel.hovered then tooltip = tooltipText.Cancel end
+        if cancel.hovered then tooltip = Params.Ui.InfoTips.Buttons.Cancel end
         if cancel.hit then map:Select() end
-
-        -- event handling
-
-        -- tooltips
-        if tip.hovered then tooltip = tooltipText.Tip end
-        
 
         Suit.layout:pop()
     end
 end
 function Ui:_menu(x, y, w, h)
-    local tooltipText = "Open the pause menu"
-
     local padx, pady = unpack(Params.Ui.SideBar.padding) -- layout padding is broken I think?
 
     local button = Suit.Button("Menu", x + padx, y + pady, w - padx*2, h - pady*2)
 
-    if button.hovered then tooltip = tooltipText end
-
-    if button.hit then Gamestate.push(Gamestate.States.Pause, self) end
+    if button.hovered then tooltip = Params.Ui.InfoTips.Buttons.Menu end
+    if button.hit then Gamestate.push(Gamestate.States.Pause) end -- this is somehow broken
 end
 
 function Ui:_population(x, y, w, h)
     Suit.layout:push(x, y)
     
     local id = "statusPop" --abuse same id to only writ the handler once in spite of multiple widgets
-    local tooltipText = "Population"
 
     Suit.Label(Assets.Icons.Population,
         {
@@ -237,7 +231,7 @@ function Ui:_population(x, y, w, h)
             align = "left"
         },
         Suit.layout:col(w - Params.Ui.IconWidth, h))
-    .hovered then tooltip = tooltipText end
+    .hovered then tooltip = Params.Ui.InfoTips.StatusBar.Population end
     
     Suit.layout:pop()
 end
@@ -246,7 +240,6 @@ function Ui:_food(x, y, w, h)
     Suit.layout:push(x, y)
     
     local id = "statusFood" --abuse same id to only writ the handler once in spite of multiple widgets
-    local tooltipText = "Food"
 
     Suit.Label(Assets.Icons.Food,
         {
@@ -262,7 +255,7 @@ function Ui:_food(x, y, w, h)
             align = "left"
         },
         Suit.layout:col(w - Params.Ui.IconWidth, h))
-    .hovered then tooltip = tooltipText end
+    .hovered then tooltip = Params.Ui.InfoTips.StatusBar.Food end
     
     Suit.layout:pop()
 end
@@ -271,7 +264,6 @@ function Ui:_lumber(x, y, w, h)
     Suit.layout:push(x, y)
     
     local id = "statusLumber" --abuse same id to only writ the handler once in spite of multiple widgets
-    local tooltipText = "Lumberrrrrr"
 
     Suit.Label(Assets.Icons.Lumber,
         {
@@ -287,7 +279,7 @@ function Ui:_lumber(x, y, w, h)
             align = "left"
         },
         Suit.layout:col(w - Params.Ui.IconWidth, h))
-    .hovered then tooltip = tooltipText end
+    .hovered then tooltip = Params.Ui.InfoTips.StatusBar.Lumber end
     
     Suit.layout:pop()
 end
