@@ -1,9 +1,11 @@
 local Camera = require "lib.hump.camera"
+local Vector = require "lib.hump.vector"
 
 local Map = require "classes.map"
 local Params = require "classes.params"
 local Player = require "classes.player"
 local Assets = require "assets.assets"
+local Ui = require "classes.ui"
 local utf8 = require "utf8"
 
 local Game = {}
@@ -15,8 +17,10 @@ local cameraViewPort = { -- bounding box of the viewport
     h = love.graphics.getHeight() - Params.Ui.StatusBar
 }
 
+local debugStats = Params.Ui.DebugStats
+
 function Game:init()
-    love.keyboard.setKeyRepeat(true)
+    self.Ui = Ui()
     self.Map = Map()
     self.Camera = Camera()
 end
@@ -48,40 +52,77 @@ function Game._CameraViewPort()
         cameraViewPort.w, cameraViewPort.h)
 end
 
-function Game:drawStatus()
-    -- Population
-    love.graphics.setFont(Assets.Fonts.StatusIcons)
-    love.graphics.print(Assets.Icons.Population, 10, 10)
-    love.graphics.setFont(Assets.Fonts.Default)
-    love.graphics.print(self.Players[1].VitalStatistix.Population, 30, 10)
-end
-
 function Game:draw()
-    -- ui
-    love.graphics.setColor(64, 64, 64, 255)
-    love.graphics.rectangle("fill", 0, Params.Ui.StatusBar, Params.Ui.SideBar, love.graphics.getHeight() - Params.Ui.StatusBar)
-    love.graphics.setColor(32, 32, 32, 255)
-    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), Params.Ui.StatusBar)
-    love.graphics.setColor(255, 255, 255, 255)
-    self:drawStatus()
-
-    -- camera viewport
-    love.graphics.stencil(self._CameraViewPort, "replace", 1)
-    love.graphics.setStencilTest("greater", 0)
-    love.graphics.translate(Params.Ui.SideBar / 2, Params.Ui.StatusBar / 2)
-    self.Camera:attach()
+    self.Camera:attach(cameraViewPort.x, cameraViewPort.y, cameraViewPort.w, cameraViewPort.h)
     self.Map:draw()
     self.Camera:detach()
 
-    -- reset
-    love.graphics.origin()
-    love.graphics.setStencilTest()
+    if debugStats then
+        local mx, my = love.mouse.getPosition()
+        local cmx, cmy = self.Camera:mousePosition()
+        local cx, cy = self.Camera:position()
+
+        love.graphics.printf(
+            "Mouse: " .. mx .. ", " .. my,
+            cameraViewPort.x, cameraViewPort.y, cameraViewPort.w, "right")
+    end
+
+    self.Ui:draw()
 end
 
 function Game:update(dt)
-    --let's try camera clamping!
-    self.Camera.x = math.clamp(self.Camera.x, cameraViewPort.w / 2 * 1/self.Camera.scale, self.Map.Width * Params.Tile.Size - cameraViewPort.w / 2 * 1/self.Camera.scale)
-    self.Camera.y = math.clamp(self.Camera.y, cameraViewPort.h / 2 * 1/self.Camera.scale, self.Map.Height * Params.Tile.Size - cameraViewPort.h / 2 * 1/self.Camera.scale)
+    self:_keyScroll(dt)
+    self:_mouseScroll(dt)
+    self:_clampCamera()
+end
+
+function Game:_toggleDebugStats()
+    if love.keyboard.allDown("lctrl", "d") then debugStats = not debugStats end
+end
+
+function Game:_clampCamera()
+    local s = 1/self.Camera.scale
+    local viewWidth, viewHeight = cameraViewPort.w / 2, cameraViewPort.h / 2
+    local mapWidth, mapHeight = self.Map.Width * Params.Tile.Size, self.Map.Height * Params.Tile.Size
+    -- i thought staging this into local variables would make it clearer, but it kinda doesn't make a difference...
+    self.Camera.x = math.clamp(self.Camera.x, viewWidth * s, mapWidth - viewWidth * s)
+    self.Camera.y = math.clamp(self.Camera.y, viewHeight * s, mapHeight - viewHeight * s)
+end
+
+function Game:_keyScroll(dt)
+    if love.keyboard.isDown("up") then
+        self.Camera:move(0, -Params.Camera.ScrollSpeed * dt)
+    end
+    if love.keyboard.isDown("down") then
+        self.Camera:move(0, Params.Camera.ScrollSpeed * dt)
+    end
+    if love.keyboard.isDown("left") then
+        self.Camera:move(-Params.Camera.ScrollSpeed * dt, 0)
+    end
+    if love.keyboard.isDown("right") then
+        self.Camera:move(Params.Camera.ScrollSpeed * dt, 0)
+    end
+end
+
+function Game:_mouseScroll(dt)
+    local x, y = love.mouse.getPosition()
+    
+    if y >= cameraViewPort.y + cameraViewPort.h * (100 - Params.Camera.EdgeScrollZone) / 100
+        and y < love.graphics.getHeight() and x < love.graphics.getWidth() then
+        self.Camera:move(0, Params.Camera.ScrollSpeed * dt)
+    end
+    if y <= cameraViewPort.y + cameraViewPort.h * Params.Camera.EdgeScrollZone / 100
+        and y > cameraViewPort.y and x > cameraViewPort.x then
+        self.Camera:move(0, -Params.Camera.ScrollSpeed * dt)
+    end
+    if x >= cameraViewPort.x + cameraViewPort.w * (100 - Params.Camera.EdgeScrollZone) / 100
+        and y < love.graphics.getHeight() and x < love.graphics.getWidth() then
+        self.Camera:move(Params.Camera.ScrollSpeed * dt, 0)
+    end
+    if x <= cameraViewPort.x + cameraViewPort.w * Params.Camera.EdgeScrollZone / 100
+        and y > cameraViewPort.y and x > cameraViewPort.x then
+        self.Camera:move(-Params.Camera.ScrollSpeed * dt, 0)
+    end
 end
 
 function Game:keypressed(key)
@@ -91,34 +132,49 @@ function Game:keypressed(key)
         return
     end
 
-    if key == "up" then
-        self.Camera:move(0, -Params.Camera.ScrollSpeed)
-    end
-    if key == "down" then
-        self.Camera:move(0, Params.Camera.ScrollSpeed)
-    end
-    if key == "left" then
-        self.Camera:move(-Params.Camera.ScrollSpeed, 0)
-    end
-    if key == "right" then
-        self.Camera:move(Params.Camera.ScrollSpeed, 0)
-    end
+    self:_toggleDebugStats()
 end
 
 function Game:wheelmoved(x, y)
+    local zoomVector = (Vector(self:vMousePosition()) - Vector(self.Camera:position())) *
+                Params.Camera.ZoomPositionAdjust
     if y > 0 then
         if self.Camera.scale < Params.Camera.MaxZoom then
             self.Camera:zoom(Params.Camera.ZoomIncrement)
+            self.Camera:move(zoomVector.x, zoomVector.y)
         end
     elseif y < 0 then
         if self.Camera.scale > Params.Camera.MinZoom then
             self.Camera:zoom(Params.Camera.ZoomExcrement)
+            self.Camera:move(zoomVector.x, zoomVector.y)
         end
+    end
+    self.Map:Hover(self:vMousePosition())
+end
+
+function Game:mousereleased(x, y, b)
+    local mx, my = self:vMousePosition()
+    if b == 3 then self.Camera:lookAt(mx, my) end
+end
+
+function Game:mousemoved(x, y)
+    if x > cameraViewPort.x and x < cameraViewPort.x + cameraViewPort.w
+        and y > cameraViewPort.y and y < cameraViewPort.y + cameraViewPort.h then
+        self.Map:Hover(self:vMousePosition())
+    else
+        self.Map:Hover(-1, -1) -- force an "unhover" by passing out of bounds coords
     end
 end
 
--- function Game:mousemoved(x, y)
---     self.Camera:lockPosition(x, y)
--- end
+-- camera viewport offset helpers
+function Game:vCameraCoords()
+    return self.Camera:cameraCoords(cameraViewPort.x, cameraViewPort.y, cameraViewPort.w, cameraViewPort.h)
+end
+function Game:vMousePosition()
+    return self.Camera:mousePosition(cameraViewPort.x, cameraViewPort.y, cameraViewPort.w, cameraViewPort.h)
+end
+function Game:vWorldCoords()
+    return self.Camera:worldCoords(cameraViewPort.x, cameraViewPort.y, cameraViewPort.w, cameraViewPort.h)
+end
 
 return Game

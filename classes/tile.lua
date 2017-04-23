@@ -17,8 +17,8 @@ local Tile = Class {
     Buildable = function(self) return self.Type ~= Params.Tile.Type.Woodland and self.Type ~= Params.Tile.Type.River end
 }
 
-function Tile:draw()
-    local x, y = self:GetBoundingBox() -- if we need them this way
+function Tile:draw(hover)
+    local x, y, w, h = self:GetBoundingBox() -- if we need them this way
 
     if self.Type == Params.Tile.Type.Grass       then love.graphics.draw(Assets.Sprites.Grass, x, y) end
     if self.Type == Params.Tile.Type.Woodland    then love.graphics.draw(Assets.Sprites.Woodland, x, y) end
@@ -30,11 +30,17 @@ function Tile:draw()
     if self.House then
         self.House:draw()
     end
+
+    if hover then
+        love.graphics.setColor(255, 255, 255, 100)
+        love.graphics.rectangle("fill", x, y, w, h)
+        love.graphics.setColor(255, 255, 255, 255)
+    end
 end
 
-function Tile:BuildHouse(player)
+function Tile:BuildHouse(player, pop)
     if not self:Buildable() then return false end
-    self.House = House(player, self)
+    self.House = House(player, self, pop)
     table.insert(player.Houses, self.House)
     return self.House
 end

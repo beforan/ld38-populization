@@ -13,14 +13,20 @@
 return {
     Ui = {
         SideBar = 200, -- width in px
-        StatusBar = 30 -- height in px
+        StatusBar = 30, -- height in px
+        DebugStats = true,
+        InfoTip = {
+            Height = 200
+        }
     },
     Camera = {
-        ScrollSpeed = 10,
+        ScrollSpeed = 400,
         ZoomIncrement = 1.1,
         ZoomExcrement = 0.9, -- couldn't resist
         MinZoom = 0.9,
-        MaxZoom = 2
+        MaxZoom = 2,
+        ZoomPositionAdjust = 0.2,
+        EdgeScrollZone = 1 -- percentage of the viewport dimensions
     },
     Game = {
         Players = { -- more than 4 players will break, but technically up to 4 should work if assets are provided, even though only 2 is intended
@@ -32,7 +38,12 @@ return {
             Lumber = 50,
             Pop = 4
         },
-        BuildTrigger = 4
+        Population = {
+            BuildTrigger = 4,
+            HouseCapacity = 4,
+            HouseLimit = 8
+        }
+        
     },
     Tile = {
         Size = 32,

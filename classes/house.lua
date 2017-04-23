@@ -5,7 +5,7 @@ local House = Class {
     init = function(self, owner, site, prepopulate)
         self.Owner = owner
         self.Site = site
-        self.Population = prepopulate or self.Population
+        self.Population = prepopulate or 0
         self.Type = Params.House.Type.Standard
     end
 }

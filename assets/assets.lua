@@ -19,6 +19,7 @@ return {
         StatusIcons = love.graphics.newFont("/assets/font-awesome/fontawesome-webfont.ttf", 14)
     },
     Icons = { --Oh god yes a unicode lookup for the fa icons i'm actually using
-        Population = utf8.char(0xf0c0)
+        Population = utf8.char(0xf0c0),
+        InfoCircle = utf8.char(0xf05a)
     }
 }

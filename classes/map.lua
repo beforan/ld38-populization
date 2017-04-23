@@ -16,6 +16,27 @@ local Map = Class {
 
 -- "public" methods
 
+function Map:Hover(posx, y)
+    local x
+    if type(posx) == "table" then
+        x, y = posx.x, posx.y
+    else x = posx end
+
+    local tx, ty = self:_getTileCoords(x, y)
+
+    if not self:_outOfBounds(tx, ty) then self.HoverTile = self.Tiles[ty][tx]
+    else self.HoverTile = nil end
+end
+
+function Map:_getTileCoords(posx, y)
+    local x
+    if type(posx) == "table" then
+        x, y = posx.x, posx.y
+    else x = posx end
+
+    return math.floor(x / Params.Tile.Size) + 1, math.floor(y / Params.Tile.Size) + 1
+end
+
 function Map:Spawn()
     local excludeQ = {}
     for _, v in ipairs(Gamestate.current().Players) do
@@ -70,9 +91,13 @@ end
 -- callbacks
 
 function Map:draw()
+    if self.HoverTile then
+        love.graphics.print(self.HoverTile.X .. ", " .. self.HoverTile.Y, 100, 10)
+    end
     for y=1, #self.Tiles do
         for x=1, #self.Tiles[y] do
-            self.Tiles[y][x]:draw()
+            local t = self.Tiles[y][x]
+            t:draw(t == self.HoverTile)
         end
     end
 end
@@ -84,6 +109,7 @@ function Map:_clear()
     for y=1, self.Height do
         self.Tiles[y] = {}
     end
+    self.HoverTile = nil
 end
 
 function Map:_getRandomTile(quad)
