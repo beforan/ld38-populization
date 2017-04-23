@@ -18,7 +18,7 @@ local Tile = Class {
     CanBuild = function(self) return self:Buildable() and not self.House and not self.Homestead end
 }
 
-function Tile:draw(hover)
+function Tile:draw(hover, selected)
     local x, y, w, h = self:GetBoundingBox() -- if we need them this way
 
     if self.Type == Params.Tile.Type.Grass       then love.graphics.draw(Assets.Sprites.Grass, x, y) end

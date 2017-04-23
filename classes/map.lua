@@ -28,6 +28,18 @@ function Map:Hover(posx, y)
     else self.HoverTile = nil end
 end
 
+function Map:Select(posx, y)
+    local x
+    if type(posx) == "table" then
+        x, y = posx.x, posx.y
+    else x = posx end
+
+    local tx, ty = self:GetTileCoords(x, y)
+
+    if not self:OutOfBounds(tx, ty) then self.SelectedTile = self.Tiles[ty][tx]
+    else self.SelectedTile = nil end
+end
+
 function Map:GetTileCoords(posx, y)
     local x
     if type(posx) == "table" then
@@ -136,6 +148,14 @@ function Map:draw()
             local t = self.Tiles[y][x]
             t:draw(t == self.HoverTile)
         end
+    end
+
+    -- draw the selected tile separately afterwards, for draw order reasons
+    if self.SelectedTile then
+        love.graphics.setColor(0, 255, 0, 255)
+        love.graphics.setLineWidth(3)
+        love.graphics.rectangle("line", self.SelectedTile:GetBoundingBox())
+        love.graphics.setColor(255, 255, 255, 255)
     end
 end
 

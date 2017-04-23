@@ -149,18 +149,15 @@ function Ui:_selectedInfo(x, y, w, h)
     -- Suit.layout:pop()
 end
 function Ui:_menu(x, y, w, h)
-    Suit.layout:push(x, y)
-    Suit.layout:padding(unpack(Params.Ui.SideBar.padding))
-    
     local tooltipText = "Open the pause menu"
 
-    local button = Suit.Button("Menu", Suit.layout:row(w, h))
+    local padx, pady = unpack(Params.Ui.SideBar.padding) -- layout padding is broken I think?
+
+    local button = Suit.Button("Menu", x + padx, y + pady, w - padx*2, h - pady*2)
 
     if button.hovered then tooltip = tooltipText end
 
     if button.hit then Gamestate.push(Gamestate.States.Pause, self) end
-    
-    Suit.layout:pop()
 end
 
 function Ui:_population(x, y, w, h)

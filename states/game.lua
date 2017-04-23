@@ -156,7 +156,19 @@ end
 
 function Game:mousereleased(x, y, b)
     local mx, my = self:vMousePosition()
+
+    -- move camera
     if b == 3 then self.Camera:lookAt(mx, my) end
+
+    -- select a tile
+    if b == 1 then
+        if x > cameraViewPort.x and x < cameraViewPort.x + cameraViewPort.w
+            and y > cameraViewPort.y and y < cameraViewPort.y + cameraViewPort.h then
+            self.Map:Select(mx, my)
+        else
+            self.Map:Select(-1, -1) -- force a "deselect" by passing out of bounds coords
+        end
+    end
 end
 
 function Game:mousemoved(x, y)
