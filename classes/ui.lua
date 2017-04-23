@@ -150,6 +150,7 @@ function Ui:_selectedInfo(x, y, w, h)
 end
 function Ui:_menu(x, y, w, h)
     Suit.layout:push(x, y)
+    Suit.layout:padding(unpack(Params.Ui.SideBar.padding))
     
     local tooltipText = "Open the pause menu"
 

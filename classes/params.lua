@@ -14,7 +14,7 @@ return {
     Ui = {
         IconWidth = 40,
         SideBar = { --suit layout definition
-            Colour = { 64, 64, 64, 255 },
+            Colour = { 64, 96, 128, 255 },
             Width = 200,
             min_height = 670, -- window height - statusbar height
             pos = { 0, 30 }, --y should be the height of the statusbar
@@ -24,7 +24,7 @@ return {
             { nil, 50 } -- menu button?
         },
         StatusBar = { --suit layout definition
-            Colour = { 32, 32, 32, 255  },
+            Colour = { 32, 64, 96, 255  },
             Height = 30,
             pos = { 0, 0 },
             padding = { 5, 5 },

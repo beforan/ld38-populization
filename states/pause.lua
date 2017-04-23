@@ -17,6 +17,9 @@ function Pause:draw()
     love.graphics.print("PAUSED!", 500, 500)
 end
 
+function Pause:update(dt)
+end
+
 function Pause:keyreleased(key)
 	if(key == "escape") then
 		Gamestate.pop()
