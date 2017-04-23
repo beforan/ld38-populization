@@ -11,10 +11,10 @@ local utf8 = require "utf8"
 local Game = {}
 
 local cameraViewPort = { -- bounding box of the viewport
-    x = Params.Ui.SideBar,
-    y = Params.Ui.StatusBar,
-    w = love.graphics.getWidth() - Params.Ui.SideBar,
-    h = love.graphics.getHeight() - Params.Ui.StatusBar
+    x = Params.Ui.SideBar.Width,
+    y = Params.Ui.StatusBar.Height,
+    w = love.graphics.getWidth() - Params.Ui.SideBar.Width,
+    h = love.graphics.getHeight() - Params.Ui.StatusBar.Height
 }
 
 local debugStats = Params.Ui.DebugStats

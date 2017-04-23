@@ -12,12 +12,19 @@
 
 return {
     Ui = {
-        SideBar = 200, -- width in px
-        StatusBar = 30, -- height in px
-        DebugStats = true,
-        InfoTip = {
-            Height = 200
-        }
+        SideBar = { --suit layout definition
+            Width = 200,
+            pos = { 0, 30 }, --y should be the height of the statusbar
+            padding = { 10, 10 },
+            { 200, 200 } --info tip
+        },
+        StatusBar = { --suit layout definition
+            Height = 30,
+            pos = { 0, 0 },
+            padding = { 10, 10 },
+            { 50, 30 } -- pop
+        },
+        DebugStats = true
     },
     Camera = {
         ScrollSpeed = 400,

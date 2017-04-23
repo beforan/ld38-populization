@@ -14,7 +14,8 @@ local Tile = Class {
     Height = Params.Tile.Size,
     RealX = function(self) return (self.X - 1) * self.Width end, -- pixel coords top
     RealY = function(self) return (self.Y - 1) * self.Height end, -- and left
-    Buildable = function(self) return self.Type ~= Params.Tile.Type.Woodland and self.Type ~= Params.Tile.Type.River end
+    Buildable = function(self) return self.Type ~= Params.Tile.Type.Woodland and self.Type ~= Params.Tile.Type.River end,
+    CanBuild = function(self) return self:Buildable() and not self.House and not self.Homestead end
 }
 
 function Tile:draw(hover)
@@ -39,8 +40,15 @@ function Tile:draw(hover)
 end
 
 function Tile:BuildHouse(player, pop)
-    if not self:Buildable() then return false end
+    if not self:CanBuild() then return false end
     self.House = House(player, self, pop)
+    
+    -- mark homestead on us and our surroundings
+    self.Homestead = true
+    for _, v in ipairs(Gamestate.current().Map:GetAdjacentTiles(self.X, self.Y)) do
+        v.Homestead = true
+    end
+
     table.insert(player.Houses, self.House)
     return self.House
 end

@@ -22,19 +22,30 @@ function Map:Hover(posx, y)
         x, y = posx.x, posx.y
     else x = posx end
 
-    local tx, ty = self:_getTileCoords(x, y)
+    local tx, ty = self:GetTileCoords(x, y)
 
-    if not self:_outOfBounds(tx, ty) then self.HoverTile = self.Tiles[ty][tx]
+    if not self:OutOfBounds(tx, ty) then self.HoverTile = self.Tiles[ty][tx]
     else self.HoverTile = nil end
 end
 
-function Map:_getTileCoords(posx, y)
+function Map:GetTileCoords(posx, y)
     local x
     if type(posx) == "table" then
         x, y = posx.x, posx.y
     else x = posx end
 
     return math.floor(x / Params.Tile.Size) + 1, math.floor(y / Params.Tile.Size) + 1
+end
+
+function Map:OutOfBounds(posx, y)
+    local x
+    if type(posx) == "table" then
+        x, y = posx.x, posx.y
+    else x = posx end
+
+    if self.Tiles[y] == nil then return true end
+    if x < 1 or x > self.Width then return true end --can't nil check x because it may not be populated yet
+    return false
 end
 
 function Map:Spawn()
@@ -50,6 +61,32 @@ function Map:Spawn()
             end
         end
     end
+end
+
+function Map:GetAdjacentCoords(posx, y)
+    local results = {}    
+    local x
+    if type(posx) == "table" then
+        x, y = posx.x, posx.y
+    else x = posx end
+
+    for dx = -1, 1 do
+        for dy = -1, 1 do
+            if not self:OutOfBounds(x + dx, y + dy) and not (dx == 0 and dy == 0) then
+                table.insert(results, { x = x + dx, y = y + dy })
+            end
+        end
+    end
+
+    return results
+end
+
+function Map:GetAdjacentTiles(posx, y)
+    local results = {}    
+    for _, v in ipairs(self:GetAdjacentCoords(posx, y)) do
+        table.insert(results, self.Tiles[v.y][v.x])
+    end
+    return results
 end
 
 function Map:Generate()
@@ -194,40 +231,11 @@ function Map:_getRiverStart(dir)
     return { x = x, y = y }
 end
 
-function Map:_outOfBounds(posx, y)
-    local x
-    if type(posx) == "table" then
-        x, y = posx.x, posx.y
-    else x = posx end
-
-    if self.Tiles[y] == nil then return true end
-    if x < 1 or x > self.Width then return true end --can't nil check x because it may not be populated yet
-    return false
-end
-
 function Map:_getOppositeDir(dir)
     if dir == Params.Map.Direction.North then return Params.Map.Direction.South end
     if dir == Params.Map.Direction.South then return Params.Map.Direction.North end
     if dir == Params.Map.Direction.West then return Params.Map.Direction.East end
     if dir == Params.Map.Direction.East then return Params.Map.Direction.West end
-end
-
-function Map:_getAdjacent(posx, y)
-    local results = {}    
-    local x
-    if type(posx) == "table" then
-        x, y = posx.x, posx.y
-    else x = posx end
-
-    for dx = -1, 1 do
-        for dy = -1, 1 do
-            if not self:_outOfBounds(x + dx, y + dy) then
-                table.insert(results, { x = x + dx, y = y + dy })
-            end
-        end
-    end
-
-    return results
 end
 
 function Map:_generateRiver()
@@ -236,7 +244,7 @@ function Map:_generateRiver()
         self.Tiles[pos.y][pos.x] = Tile(pos.x, pos.y, Params.Tile.Type.River) --render the current tile
 
         -- set all adjacent tiles to riverside
-        for _, v in ipairs(self:_getAdjacent(pos)) do
+        for _, v in ipairs(self:GetAdjacentCoords(pos)) do
             if not self.Tiles[v.y][v.x] then
                 self.Tiles[v.y][v.x] = Tile(v.x, v.y, Params.Tile.Type.Riverside)
             end
@@ -252,7 +260,7 @@ function Map:_generateRiver()
         if dir == Params.Map.Direction.East then pos.x = pos.x + 1 end
         if dir == Params.Map.Direction.West then pos.x = pos.x - 1 end
 
-        if not self:_outOfBounds(pos) then
+        if not self:OutOfBounds(pos) then
             nextRiverTile(pos, dir, favourDir)
         end
     end

@@ -1,6 +1,9 @@
 local Class = require "lib.hump.class"
+local Suit = require "lib.suit"
 local Assets = require "assets.assets"
 local Params = require "classes.params"
+
+local status
 
 local Ui = Class {}
 
@@ -15,14 +18,14 @@ end
 function Ui:_drawInfoTip()
     -- background
     love.graphics.setColor(0, 0, 0, 100)
-    love.graphics.rectangle("fill", 10, Params.Ui.StatusBar + 10, Params.Ui.SideBar - 20, Params.Ui.InfoTip.Height)
+    love.graphics.rectangle("fill", 10, Params.Ui.StatusBar.Height + 10, Params.Ui.SideBar.Width - 20, 200)
     love.graphics.setColor(255, 255, 255, 255)
 
     --title
     love.graphics.setFont(Assets.Fonts.StatusIcons)
-    love.graphics.print(Assets.Icons.InfoCircle, 20, Params.Ui.StatusBar + 20)
+    love.graphics.print(Assets.Icons.InfoCircle, 20, Params.Ui.StatusBar.Height + 20)
     love.graphics.setFont(Assets.Fonts.Default)
-    love.graphics.print("Information", 40, Params.Ui.StatusBar + 20)
+    love.graphics.print("Information", 40, Params.Ui.StatusBar.Height + 20)
 
     --infotip
     local gs = Gamestate.current()
@@ -41,8 +44,8 @@ function Ui:_drawInfoTip()
         table.insert(text, cText)
         table.insert(text, t.Type .. "\n")
 
-        local h = t.House
-        if t:Buildable() and not h then
+        
+        if t:CanBuild() then
             table.insert(text, cGood)
             table.insert(text, "Can build here\n")
         else
@@ -50,6 +53,7 @@ function Ui:_drawInfoTip()
             table.insert(text, "Can't build here\n")
         end
 
+        local h = t.House
         if h then
             table.insert(text, cTitle)
             table.insert(text, "House: ")
@@ -64,22 +68,33 @@ function Ui:_drawInfoTip()
                 table.insert(text, cWarning)
             else table.insert(text, cText) end
             table.insert(text, h.Population .. "/" .. Params.Game.Population.HouseCapacity .. "\n")
+
+            --type specific info?
+        end
+
+        if t.Homestead then
+            table.insert(text, cText)
+            table.insert(text, "I'm a homestead!\n") --add house counts?
         end
     end
 
-    love.graphics.printf(text, 20, Params.Ui.StatusBar + 40, Params.Ui.SideBar - 40)
+    love.graphics.printf(text, 20, Params.Ui.StatusBar.Height + 40, Params.Ui.SideBar.Width - 40)
 end
 
 function Ui:draw()
     --background for ui zones
     love.graphics.setColor(64, 64, 64, 255)
-    love.graphics.rectangle("fill", 0, Params.Ui.StatusBar, Params.Ui.SideBar, love.graphics.getHeight() - Params.Ui.StatusBar)
+    love.graphics.rectangle("fill", 0, Params.Ui.StatusBar.Height, Params.Ui.SideBar.Width, love.graphics.getHeight() - Params.Ui.StatusBar.Height)
     love.graphics.setColor(32, 32, 32, 255)
-    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), Params.Ui.StatusBar)
+    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), Params.Ui.StatusBar.Height)
     love.graphics.setColor(255, 255, 255, 255)
     
     self:_drawStatus()
     self:_drawInfoTip()
+end
+
+function Ui:update(dt)
+
 end
 
 return Ui
