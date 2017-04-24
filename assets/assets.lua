@@ -2,6 +2,7 @@ local utf8 = require "utf8" -- for fa icons
 
 return {
     Sprites = {
+        PlayerMarker = love.graphics.newImage("/assets/jon/marker.png"),
         Grass = love.graphics.newImage("/assets/jon/grass.png"),
         Woodland = love.graphics.newImage("/assets/jon/woodland.png"),
         Riverside = love.graphics.newImage("/assets/jon/riverside.png"),

@@ -209,11 +209,6 @@ function Ui:_selectedInfo(x, y, w, h, padx, pady)
                 if builder.hit then t.House:Convert(Params.House.Type.Builder) end
             end
         end
-        
-        -- cancel selection
-        local cancel = Suit.Button("Cancel Selection", unpack(getNextButton()))
-        if cancel.hovered then tooltip = Params.Ui.InfoTips.Buttons.Cancel end
-        if cancel.hit then map:Select() end
 
         Suit.layout:pop()
     end

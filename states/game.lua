@@ -60,6 +60,9 @@ end
 function Game:draw()
     self.Camera:attach(cameraViewPort.x, cameraViewPort.y, cameraViewPort.w, cameraViewPort.h)
     self.Map:draw()
+    -- draw human player marker
+    local m = self.Players[1].MarkedTile
+    if m then love.graphics.draw(Assets.Sprites.PlayerMarker, m:RealX(), m:RealY()) end
     self.Camera:detach()
 
     if debugStats then
@@ -142,7 +145,7 @@ function Game:_tick(dt)
             if house.Type == Params.House.Type.Builder then
                 builders = builders + house.Population
             end
-            if house.Type == Params.House.Type.Farmer then
+            if house.Type == Params.House.Type.Farmer or house.Type == Params.House.Type.Fisher then
                 farmers = farmers + house.Population
             end
 
@@ -174,7 +177,7 @@ function Game:_tick(dt)
         end
 
         -- calculate food and lumber since it affects growth and building
-        harvest = farmers * 3 -- params
+        harvest = farmers * 10 -- params
         consumption = pop + farmers + lumberjacks + builders -- params
         food = food + harvest - consumption
         if food < 0 then
@@ -190,15 +193,18 @@ function Game:_tick(dt)
                 Reason = "No more room left on this small world!\n"
             }
         end
-        -- update build progress
-        buildProgress = buildProgress + Params.Game.Progress.Build.Tick
-        buildProgress = buildProgress + builders * Params.Game.Progress.Build.BuilderModifier
-        -- modifiers to buildCost?
-        if buildProgress > buildCost then
-            local den = buildDens[math.random(#buildDens)]
-            den:BuildHouse(player)
-            housing = housing + Params.Game.Population.HouseCapacity
-            buildProgress = 0
+        
+        if #fullHouses + #deathDens > 0 then --no building at all unless needed
+            -- update build progress
+            buildProgress = buildProgress + Params.Game.Progress.Build.Tick
+            buildProgress = buildProgress + builders * Params.Game.Progress.Build.BuilderModifier
+            -- modifiers to buildCost?
+            if buildProgress > buildCost then
+                local den = buildDens[math.random(#buildDens)]
+                den:BuildHouse(player)
+                housing = housing + Params.Game.Population.HouseCapacity
+                buildProgress = 0
+            end
         end
 
         -- growth?
@@ -373,11 +379,23 @@ function Game:mousereleased(x, y, b)
         end
     end
 
-    -- deselect a tile
+    --right mouse
     if b == 2 then
+        
         if x > cameraViewPort.x and x < cameraViewPort.x + cameraViewPort.w
             and y > cameraViewPort.y and y < cameraViewPort.y + cameraViewPort.h then
-            self.Map:Select()
+            
+            -- deselect a tile
+            if self.Map.SelectedTile then
+                self.Map:Select()
+            else -- marker functionality
+                local m = self.Players[1].MarkedTile
+                if m then
+                    if m == self.Map.HoverTile then
+                        self.Players[1].MarkedTile = nil --unmark
+                    else self.Players[1].MarkedTile = self.Map.HoverTile end -- change mark
+                else self.Players[1].MarkedTile = self.Map.HoverTile end -- fresh mark
+            end
         end
     end
 end

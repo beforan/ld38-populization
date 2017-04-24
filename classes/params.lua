@@ -67,11 +67,11 @@ local Params = {
             HouseCapacity = 4,
             HouseLimit = 8
         },
-        Heartbeat = 0.1, -- tick rate in seconds
+        Heartbeat = 1, -- tick rate in seconds
         WoodlandYield = 10,
         Progress = {
             Growth = {
-                Cost = 10,
+                Cost = 5,
                 UnhealthyModifier = -1,
                 UnhappyModifier = -1
             },
