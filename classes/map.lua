@@ -201,6 +201,7 @@ function Map:_clear()
         self.Tiles[y] = {}
     end
     self.HoverTile = nil
+    self.SelectedTile = nil
 end
 
 function Map:_getRandomTile(quad)

@@ -239,12 +239,17 @@ function Game:_tick(dt)
             end
         end
 
-        -- move house?
-        if #fullHouses > 0 and #destinations > 0 then
-
-        end
-
         -- update woodland yield
+
+        -- move house? DO THIS LAST?!
+        if #fullHouses > 0 and #destinations > 0 then
+            source = fullHouses[math.random(#fullHouses)]
+            dest = destinations[math.random(#destinations)]
+            source.Population = source.Population - 1
+            dest.Population = dest.Population + 1
+            --nothing else to update; if either house was a den this tick, it's already been processed so doesn't matter
+            -- technically we're a potential tick out of date on health/happiness for reporting but meh
+        end
 
         -- then update each player's vital statistix
         player.VitalStatistix.Population = pop
