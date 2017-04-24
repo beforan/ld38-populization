@@ -15,31 +15,26 @@ function House:draw()
     love.graphics.draw(self.Owner.Sprites.Standard, self.Site:RealX(), self.Site:RealY())
 end
 
-function House:CheckSurrounded()
-    local houseCount, map = 0, Gamestate.current().Map
+function House:_getBuildableNeighbours()
+    local buildables, map = {}, Gamestate.current().Map
     for dir, ct in ipairs(map:GetCardinalTiles(self.Site.X, self.Site.Y)) do
-        -- and then for every NEWS tile, we need to know where there is a house in the same direction
+        -- and then for every NEWS tile, we need to know when we can build in the same direction
         local t = map:GetAdjacentTile(ct.X, ct.Y, dir)
         if t then
-            --print(dir, t:CanBuild(), t.House, t.Homestead)
-            if not t:CanBuild() then houseCount = houseCount + 1 end
-        else --out of bounds - counts as surrounded :|
-            --print(dir, "no valid tile")
-            houseCount = houseCount + 1
+            if t:CanBuild() then table.insert(buildables, t) end
         end
     end
-    self.Surrounded = houseCount == 4
+    return buildables
+end
+
+function House:CheckSurrounded()
+    local buildables = self:_getBuildableNeighbours()
+    self.Surrounded = #buildables == 0 -- if there's nowhere we can build, we're surrounded
 end
 
 function House:BuildHouse(player)
-    local targets, map = {}, Gamestate.current().Map
-    for dir, ct in ipairs(map:GetCardinalTiles(self.Site.X, self.Site.Y)) do
-        local t = map:GetAdjacentTile(ct.X, ct.Y, dir)
-        if t then
-            if t:CanBuild() then table.insert(targets, t) end
-        end
-    end
-    targets[math.random(#targets)]:BuildHouse(player)
+    local buildables = self:_getBuildableNeighbours()
+    buildables[math.random(#buildables)]:BuildHouse(player)
 end
 
 return House

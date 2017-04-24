@@ -213,9 +213,11 @@ function Game:_tick(dt)
             else -- no dens available? allow sex without cohabitation
                 den = soloHouses[math.random(#soloHouses)]
             end
-            den.Population = den.Population + 1
-            pop = pop + 1
-            growthProgress = 0
+            if den then
+                den.Population = den.Population + 1
+                pop = pop + 1
+                growthProgress = 0
+            end
         end
         -- death?
         deathProgress = deathProgress + Params.Game.Progress.Death.Tick
