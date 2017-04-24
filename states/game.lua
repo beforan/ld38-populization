@@ -31,6 +31,14 @@ function Game:enter()
     self:_newGame()
 end
 
+function Game:resume(...)
+    local action, param = select(3, ...), select(4, ...)
+    if action then
+        if action == "new" then self:_newGame() end
+        if action == "switch" then Gamestate.switch(param) end
+    end
+end
+
 function Game:_newGame()
     self.ticks = 0
     self.GameOver = nil
@@ -107,7 +115,6 @@ function Game:_tick(dt)
         -- grab a vector for the marker tile
         local vMarker
         if player.MarkedTile then vMarker = Vector(player.MarkedTile.X, player.MarkedTile.Y) end
-        print(vMarker)
 
         -- special buildings?
 
@@ -182,11 +189,9 @@ function Game:_tick(dt)
                         local vH = Vector(house.Site.X, house.Site.Y)
                         if not preferredBuilder.House then
                             preferredBuilder = { House = house, Distance = vH:dist(vMarker) } -- can't do worse than nothing!
-                            print(preferredBuilder.Distance) 
                         else --get distance to marker and evaluate if we're nearer
                             if vH:dist(vMarker) < preferredBuilder.Distance then
                             preferredBuilder = { House = house, Distance = vH:dist(vMarker) } end
-                            print(preferredBuilder.Distance)
                         end
                     end
                 end
@@ -194,7 +199,7 @@ function Game:_tick(dt)
         end
 
         -- calculate food and lumber since it affects growth and building
-        harvest = farmers * 10 -- params
+        harvest = farmers * Params.House.Farmer.FoodYield
         consumption = pop + farmers + lumberjacks + builders -- params
         food = food + harvest - consumption
         if food < 0 then
@@ -202,6 +207,10 @@ function Game:_tick(dt)
             food = 0
         end
         -- lumber is more complicated
+
+        -- calculate happiness, disease?
+        disease = #deathDens
+        happiness = pop - housing
 
         -- build?
         if #buildDens <= 0 then
@@ -226,7 +235,7 @@ function Game:_tick(dt)
 
         -- growth?
         -- update growth progress
-        growthProgress = growthProgress + food
+        growthProgress = growthProgress + food + happiness * -Params.Game.Progress.Growth.UnhappyModifier
         
         -- modifiers to growthCost?
         if growthProgress > growthCost then
@@ -351,10 +360,16 @@ function Game:keypressed(key)
 end
 
 function Game:keyreleased(key)
-    if key == "m" then
-        print("Reticulating splines")
-        self:_newGame()
-        return
+    if Params.Game.Debug then
+        if key == "m" then
+            print("Reticulating splines")
+            self:_newGame()
+            return
+        end
+
+        if key == "x" then
+            Gamestate.push(Gamestate.States.GameOver)
+        end
     end
 
     if key == "escape" then Gamestate.push(Gamestate.States.Pause) end

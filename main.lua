@@ -4,6 +4,10 @@ Gamestate = require "lib.hump.gamestate"
 Gamestate.States = {
     Game = require "states.game",
     Pause = require "states.pause",
+    Menu = require "states.menu",
+    Help = require "states.help",
+    Credits = require "states.credits",
+    Controls = require "states.controls",
     GameOver = require "states.gameover"
 }
 

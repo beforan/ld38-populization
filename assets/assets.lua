@@ -25,6 +25,9 @@ return {
     },
     Fonts = {
         Default = love.graphics.getFont(),
+        Important = love.graphics.newFont(18),
+        OverlayBanner = love.graphics.newFont(72),
+        OverlaySubtext = love.graphics.newFont(30),
         StatusIcons = love.graphics.newFont("/assets/font-awesome/fontawesome-webfont.ttf", 14)
     },
     Icons = { --Oh yes a unicode lookup for the fa icons i'm actually using

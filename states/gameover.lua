@@ -1,8 +1,18 @@
+local Suit = require "lib.suit"
+
+local Params = require "classes.params"
+local Assets = require "assets.assets"
+
 local GameOver = {}
 
 function GameOver:enter(from)
     self.background = love.graphics.newImage(love.graphics.newScreenshot())
-    self.GameOver = from.GameOver
+    self.GameOver = from.GameOver or {}
+    self.Players = from.Players
+end
+
+function GameOver:leave()
+    self.background = nil
 end
 
 function GameOver:draw()
@@ -21,34 +31,57 @@ function GameOver:draw()
     local result = false
     local humanWin = false
 
+    local function bannerText(text)
+        love.graphics.setFont(Assets.Fonts.OverlayBanner)
+        love.graphics.printf(text, 0, 200, love.graphics.getWidth(), "center")
+        love.graphics.setFont(Assets.Fonts.Default)
+    end
+
+    
+
     if self.GameOver.Win then
-        if self.GameOver.Player.Human then humanWin = true end
+        if self.GameOver.Player == self.Players[1] then humanWin = true end
     elseif self.GameOver.Lose then
         if not self.GameOver.Player.Human then humanWin = true end
     elseif self.GameOver.Score then
-        love.graphics.print("We've totted up your scores", 500, 400)
+        self.GameOver.Reason = self.GameOver.Player.Colour " had the higher score!"
         --TODO score totting and determining human victory
     else
-        love.graphics.print("Result Inconclusive!", 500, 400)
+        bannerText({ Params.Ui.TextColours.Warning, "Result inconclusive..." })
         result = true
     end
 
     -- print a message to the human about whether they won
     if not result then
         if humanWin then
-            love.graphics.print("YOU WIN!", 500, 400)
+            bannerText({ Params.Ui.TextColours.Good, "YOU WIN!" })
         else
-            love.graphics.print("YOU LOSE!", 500, 400)
+            bannerText({ Params.Ui.TextColours.Bad, "YOU LOSE!" })
         end
     end
     
-    love.graphics.print(self.GameOver.Reason or "Who knows why?", 500, 500)
+    love.graphics.setFont(Assets.Fonts.OverlaySubtext)
+    love.graphics.printf(self.GameOver.Reason or "Who knows why?", 0, 350, love.graphics.getWidth(), "center")
+    love.graphics.setFont(Assets.Fonts.Default)
+
+    Suit.draw()
 end
 
-function GameOver:keyreleased(key)
-	if(key == "escape") then
-		Gamestate.switch(Gamestate.States.Game) -- start a new game
-	end
+function GameOver:update(dt)
+    Suit.layout:reset(love.graphics.getWidth() / 2 - 100, 450, 10, 10)
+    
+    
+    if Suit.Button("Play Again", Suit.layout:row(200, 30)).hit then
+        return Gamestate:pop("new")
+    end
+
+    if Suit.Button("Quit to Menu", Suit.layout:row()).hit then
+        return Gamestate:pop("switch", Gamestate.States.Menu)
+    end
+
+    if Suit.Button("Quit to Desktop", Suit.layout:row()).hit then
+        love.event.quit()
+    end
 end
 
 return GameOver

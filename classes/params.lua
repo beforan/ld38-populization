@@ -10,8 +10,11 @@
 --
 -- oh well, game jams, amirite?
 
+local debug = true
+
 local Params = {
     Ui = {
+        ImportantMessageTimer = 2, -- seconds
         TextColours = {
             Title = { 180, 180, 255, 255 },
             Good = { 180, 255, 180, 255 },
@@ -41,7 +44,7 @@ local Params = {
             { 100, 30 }, -- food
             { 100, 30 } -- lumber
         },
-        DebugStats = true
+        DebugStats = debug
     },
     Camera = {
         ScrollSpeed = 400,
@@ -53,6 +56,7 @@ local Params = {
         EdgeScrollZone = 1 -- percentage of the viewport dimensions
     },
     Game = {
+        Debug = debug,
         Players = { -- more than 4 players will break, but technically up to 4 should work if assets are provided, even though only 2 is intended
             [1] = "Blue",
             [2] = "Red"
@@ -63,7 +67,6 @@ local Params = {
             Pop = 4
         },
         Population = {
-            BuildTrigger = 4,
             HouseCapacity = 4,
             HouseLimit = 8
         },
@@ -71,8 +74,7 @@ local Params = {
         WoodlandYield = 10,
         Progress = {
             Growth = {
-                Cost = 5,
-                UnhealthyModifier = -1,
+                Cost = 7,
                 UnhappyModifier = -1
             },
             Death = {
@@ -83,6 +85,7 @@ local Params = {
             },
             Build = {
                 Cost = 10,
+                LumberCost = 2, -- lumber cost for a Standard house
                 Tick = 1, -- building occurs naturally, but faster when modified
                 BuilderModifier = 1
             }
@@ -106,6 +109,20 @@ local Params = {
             Lumberjack = "Lumberjack",
             Farmer = "Farmer",
             Fisher = "Fisher"            
+        },
+        Builder = {
+            LumberCost = 12,
+            ExtraFood = 1
+        },
+        Lumberjack = {
+            LumberCost = 8,
+            ExtraFood = 1,
+            LumberYield = 1
+        },
+        Farmer = { -- and fisher
+            LumberCost = 10,
+            ExtraFood = 1,
+            FoodYield = 5
         }
     },
     Map = {
@@ -133,7 +150,21 @@ local Params = {
     }
 }
 
---InfoTips (these reference other params)
+
+-- (these reference other params)
+
+-- Important Messages (bottom of screen feedback)
+Params.Ui.Important = {
+    NotEnoughLumber = {
+        Params.Ui.TextColours.Text, "Not enough ",
+        Params.Ui.TextColours.Good, "Lumber",
+        Params.Ui.TextColours.Text, ", mine more ",
+        Params.Ui.TextColours.Good, "Lumber",
+        Params.Ui.TextColours.Text, ".",
+    }
+}
+
+--InfoTips
 Params.Ui.InfoTips = {
     InfoTip = "This area provides useful information on elements of the game world and the user interface!",
     SelecTip = "Detailed information about the currently selected map tile.",
@@ -189,5 +220,8 @@ Params.Ui.InfoTips = {
         Cancel = "Deselect the tile without taking any action."
     }
 }
+
+-- aliases?
+Params.House.Fisher = Params.House.Farmer
 
 return Params

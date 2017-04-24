@@ -6,6 +6,7 @@ local Params = require "classes.params"
 local tooltip
 local infotip
 local selectip
+local importantMessage, importantTimer = nil, 0
 
 local colours = Params.Ui.TextColours
 
@@ -134,12 +135,29 @@ function Ui:draw()
 
     self:_drawTip(infotip) -- not a widget so Suit won't draw it
     self:_drawTip(selectip)
+    
+    if importantMessage then
+        love.graphics.setFont(Assets.Fonts.Important)
+        love.graphics.printf(importantMessage,
+        Params.Ui.SideBar.Width + 10,
+        love.graphics.getHeight() - 40,
+        love.graphics.getWidth() - Params.Ui.SideBar.Width + 10)
+        love.graphics.setFont(Assets.Fonts.Default)
+    end
+end
+
+function Ui:ImportantMessage(text)
+    importantMessage = text
+    importantTimer = Params.Ui.ImportantMessageTimer
 end
 
 function Ui:update(dt)
     Suit.layout:reset()
     tooltip = nil
     selectip = nil
+
+    if importantTimer > 0 then importantTimer = importantTimer - dt
+    else importantMessage = nil end
 
     local statusBar = Suit.layout:cols(Params.Ui.StatusBar)
     self:_statusBar(statusBar)
@@ -163,6 +181,7 @@ end
 function Ui:_selectedInfo(x, y, w, h, padx, pady)
     -- this section is entirely on the condition a tile is selected
     local gs = Gamestate.current()
+    local player = gs.Players[1]
     local map = gs.Map
 
     local t = map.SelectedTile
@@ -186,27 +205,36 @@ function Ui:_selectedInfo(x, y, w, h, padx, pady)
 
         if t.House then
             -- Specialists
+            local function buildSpecialist(type)
+                if player.VitalStatistix.Lumber >= Params.House[type].LumberCost then
+                    t.House:Convert(type)
+                    player.VitalStatistix.Lumber = player.VitalStatistix.Lumber - Params.House.Lumberjack.LumberCost
+                else
+                    self:ImportantMessage(Params.Ui.Important.NotEnoughLumber)
+                end
+            end
+
             if t.House:CanBecomeLumberjack() then
                 local lumberjack = Suit.Button("Upgrade: Lumberjack", unpack(getNextButton()))
                 if lumberjack.hovered then tooltip = Params.Ui.InfoTips.Buttons.Lumberjack end
-                if lumberjack.hit then t.House:Convert(Params.House.Type.Lumberjack) end
+                if lumberjack.hit then buildSpecialist(Params.House.Type.Lumberjack) end
             end
             
             if t.House:CanBecomeFarmer() then
                 local farmer = Suit.Button("Upgrade: Farmer", unpack(getNextButton()))
                 if farmer.hovered then tooltip = Params.Ui.InfoTips.Buttons.Farmer end
-                if farmer.hit then t.House:Convert(Params.House.Type.Farmer) end
+                if farmer.hit then buildSpecialist(Params.House.Type.Farmer) end
             end
             if t.House:CanBecomeFisher() then
                 local fisher = Suit.Button("Upgrade: Fisher", unpack(getNextButton()))
                 if fisher.hovered then tooltip = Params.Ui.InfoTips.Buttons.Fisher end
-                if fisher.hit then t.House:Convert(Params.House.Type.Fisher) end
+                if fisher.hit then buildSpecialist(Params.House.Type.Fisher) end
             end
 
             if t.House:CanBecomeBuilder() then
                 local builder = Suit.Button("Upgrade: Builder", unpack(getNextButton()))
                 if builder.hovered then tooltip = Params.Ui.InfoTips.Buttons.Builder end
-                if builder.hit then t.House:Convert(Params.House.Type.Builder) end
+                if builder.hit then buildSpecialist(Params.House.Type.Builder) end
             end
         end
 
