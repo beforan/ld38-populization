@@ -85,7 +85,7 @@ function Map:GetCardinalTiles(posx, y)
 
     local results = {}
     for _, dir in pairs(Params.Map.Direction) do
-        table.insert(results, Map:GetAdjacentTile(x, y, dir))
+        results[dir] = Map:GetAdjacentTile(x, y, dir) -- index by the dir value to ensure sane order
     end
     return results
 end
@@ -102,6 +102,7 @@ function Map:GetAdjacentTile(posx, diry, dir)
     if dir == Params.Map.Direction.East then dx, dy = 1, 0 end
     if dir == Params.Map.Direction.West then dx, dy = -1, 0 end
 
+    print(x,y, dx, dy, dir, x + dx, y + dy)
     if not self:OutOfBounds(x + dx, y + dy) then
         return self.Tiles[y + dy][x + dx]
     end

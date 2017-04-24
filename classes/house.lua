@@ -21,9 +21,10 @@ function House:CheckSurrounded()
         -- and then for every NEWS tile, we need to know where there is a house in the same direction
         local t = map:GetAdjacentTile(ct.X, ct.Y, dir)
         if t then
-            print(t:CanBuild(), t.House, t.Homestead)
+            print(dir, t:CanBuild(), t.House, t.Homestead)
             if not t:CanBuild() then houseCount = houseCount + 1 end
         else --out of bounds - counts as surrounded :|
+            print(dir, "no valid tile")
             houseCount = houseCount + 1
         end
     end
@@ -34,7 +35,9 @@ function House:BuildHouse(player)
     local targets, map = {}, Gamestate.current().Map
     for dir, ct in ipairs(map:GetCardinalTiles(self.Site.X, self.Site.Y)) do
         local t = map:GetAdjacentTile(ct.X, ct.Y, dir)
-        if t:CanBuild() then table.insert(targets, t) end
+        if t then
+            if t:CanBuild() then table.insert(targets, t) end
+        end
     end
     targets[math.random(#targets)]:BuildHouse(player)
 end

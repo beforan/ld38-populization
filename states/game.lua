@@ -357,6 +357,14 @@ function Game:mousereleased(x, y, b)
             self.Map:Select(mx, my)
         end
     end
+
+    -- deselect a tile
+    if b == 2 then
+        if x > cameraViewPort.x and x < cameraViewPort.x + cameraViewPort.w
+            and y > cameraViewPort.y and y < cameraViewPort.y + cameraViewPort.h then
+            self.Map:Select()
+        end
+    end
 end
 
 function Game:mousemoved(x, y)
