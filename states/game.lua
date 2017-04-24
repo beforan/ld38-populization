@@ -120,7 +120,7 @@ function Game:_tick(dt)
         local buildCost, buildSpeed, lumberDens, buildDens = Params.Game.Progress.Build.Cost, 0, {}, {}
 
         -- growth
-        local growthCost, growthDens = Params.Game.Progress.Growth.Cost, {}
+        local growthCost, growthDens, soloHouses = Params.Game.Progress.Growth.Cost, {}, {}
         local deathCost, deathDens, fullHouses = Params.Game.Progress.Death.Cost, {}, {}
         
         -- migration
@@ -150,6 +150,7 @@ function Game:_tick(dt)
             if house.Population > 1 and house.Population < Params.Game.Population.HouseLimit then
                 table.insert(growthDens, house)
             end
+            if house.Population == 1 then table.insert(soloHouses, house) end
 
             -- eligibility for migration or death
             if house.Population >= Params.Game.Population.HouseCapacity then
@@ -210,7 +211,7 @@ function Game:_tick(dt)
             if #growthDens > 0 then
                 den = growthDens[math.random(#growthDens)]
             else -- no dens available? allow sex without cohabitation
-                den = player.Houses[math.random(#player.Houses)]
+                den = soloHouses[math.random(#soloHouses)]
             end
             den.Population = den.Population + 1
             pop = pop + 1

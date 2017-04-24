@@ -58,7 +58,7 @@ local Params = {
             [2] = "Red"
         },
         Start = {
-            Food = 50,
+            Food = 5000,
             Lumber = 50,
             Pop = 4
         },
