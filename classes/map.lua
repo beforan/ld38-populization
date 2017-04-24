@@ -102,7 +102,7 @@ function Map:GetAdjacentTile(posx, diry, dir)
     if dir == Params.Map.Direction.East then dx, dy = 1, 0 end
     if dir == Params.Map.Direction.West then dx, dy = -1, 0 end
 
-    print(x,y, dx, dy, dir, x + dx, y + dy)
+    --print(x,y, dx, dy, dir, x + dx, y + dy)
     if not self:OutOfBounds(x + dx, y + dy) then
         return self.Tiles[y + dy][x + dx]
     end
