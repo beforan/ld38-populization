@@ -104,6 +104,11 @@ function Game:_tick(dt)
 
     -- iterate through each players houses, assessing income and expenses of all resources
     for _, player in ipairs(self.Players) do
+        -- grab a vector for the marker tile
+        local vMarker
+        if player.MarkedTile then vMarker = Vector(player.MarkedTile.X, player.MarkedTile.Y) end
+        print(vMarker)
+
         -- special buildings?
 
         -- persistent stats (not purely recalculated every frame)
@@ -120,7 +125,8 @@ function Game:_tick(dt)
         local harvest, consumption = 0, 0
 
         -- lumber
-        local buildCost, buildSpeed, lumberDens, buildDens = Params.Game.Progress.Build.Cost, 0, {}, {}
+        local buildCost, buildSpeed = Params.Game.Progress.Build.Cost, 0
+        lumberDens, buildDens, preferredBuilder = {}, {}, {}
 
         -- growth
         local growthCost, growthDens, soloHouses = Params.Game.Progress.Growth.Cost, {}, {}
@@ -168,10 +174,21 @@ function Game:_tick(dt)
             -- eligibility for building or gathering from
             if not house.Surrounded then
                 house:CheckSurrounded() -- in case we or somebody nearby built last tick
-                --print(house.Surrounded)
                 if not house.Surrounded then --still good?
                     table.insert(lumberDens, house)
                     table.insert(buildDens, house)
+                    -- assess potential build preference
+                    if vMarker then
+                        local vH = Vector(house.Site.X, house.Site.Y)
+                        if not preferredBuilder.House then
+                            preferredBuilder = { House = house, Distance = vH:dist(vMarker) } -- can't do worse than nothing!
+                            print(preferredBuilder.Distance) 
+                        else --get distance to marker and evaluate if we're nearer
+                            if vH:dist(vMarker) < preferredBuilder.Distance then
+                            preferredBuilder = { House = house, Distance = vH:dist(vMarker) } end
+                            print(preferredBuilder.Distance)
+                        end
+                    end
                 end
             end
         end
@@ -200,7 +217,7 @@ function Game:_tick(dt)
             buildProgress = buildProgress + builders * Params.Game.Progress.Build.BuilderModifier
             -- modifiers to buildCost?
             if buildProgress > buildCost then
-                local den = buildDens[math.random(#buildDens)]
+                local den = preferredBuilder.House or buildDens[math.random(#buildDens)]
                 den:BuildHouse(player)
                 housing = housing + Params.Game.Population.HouseCapacity
                 buildProgress = 0
@@ -254,7 +271,7 @@ function Game:_tick(dt)
 
         -- update woodland yield
 
-        -- move house? DO THIS LAST?!
+        -- move house? DO THIS LAST?! TODO prioritise specialists
         if #fullHouses > 0 and #destinations > 0 then
             source = fullHouses[math.random(#fullHouses)]
             dest = destinations[math.random(#destinations)]
