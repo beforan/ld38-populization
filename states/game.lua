@@ -203,14 +203,18 @@ function Game:_tick(dt)
         -- growth?
         -- update growth progress
         growthProgress = growthProgress + food
-        if #growthDens > 0 then
-            -- modifiers to growthCost?
-            if growthProgress > growthCost then
-                local den = growthDens[math.random(#growthDens)]
-                den.Population = den.Population + 1
-                pop = pop + 1
-                growthProgress = 0
+        
+        -- modifiers to growthCost?
+        if growthProgress > growthCost then
+            local den
+            if #growthDens > 0 then
+                den = growthDens[math.random(#growthDens)]
+            else -- no dens available? allow sex without cohabitation
+                den = player.Houses[math.random(#player.Houses)]
             end
+            den.Population = den.Population + 1
+            pop = pop + 1
+            growthProgress = 0
         end
         -- death?
         deathProgress = deathProgress + Params.Game.Progress.Death.Tick
@@ -245,10 +249,13 @@ function Game:_tick(dt)
         if #fullHouses > 0 and #destinations > 0 then
             source = fullHouses[math.random(#fullHouses)]
             dest = destinations[math.random(#destinations)]
-            source.Population = source.Population - 1
-            dest.Population = dest.Population + 1
-            --nothing else to update; if either house was a den this tick, it's already been processed so doesn't matter
-            -- technically we're a potential tick out of date on health/happiness for reporting but meh
+            -- check status of both to ensure migration still works
+            if source.Population > 0 and dest.Population < Params.Game.Population.HouseLimit then
+                source.Population = source.Population - 1
+                dest.Population = dest.Population + 1
+                -- nothing else to update; if either house was a den this tick, it's already been processed so doesn't matter
+                -- technically we're a potential tick out of date on health/happiness for reporting but meh
+            end
         end
 
         -- then update each player's vital statistix
