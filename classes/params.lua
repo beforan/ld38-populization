@@ -104,7 +104,8 @@ local Params = {
             Standard = "Standard",
             Builder = "Builder",
             Lumberjack = "Lumberjack",
-            Farmer = "Farmer"
+            Farmer = "Farmer",
+            Fisher = "Fisher"            
         }
     },
     Map = {
@@ -152,7 +153,38 @@ Params.Ui.InfoTips = {
             Params.Ui.TextColours.Good, "Lumber",
             Params.Ui.TextColours.Text, " income.\n\n",
             Params.Ui.TextColours.Good, "Lumber",
-            Params.Ui.TextColours.Text, " is used for all building actions.",
+            Params.Ui.TextColours.Text, " is used for all building actions."
+        },
+        Farmer = {
+            Params.Ui.TextColours.Text, "Turn this ",
+            Params.Ui.TextColours.Title, "Standard",
+            Params.Ui.TextColours.Text, " house into a ",
+            Params.Ui.TextColours.Title, "Farmer",
+            Params.Ui.TextColours.Text, " house.\n\nThis will provide ",
+            Params.Ui.TextColours.Good, "Food",
+            Params.Ui.TextColours.Text, " income, same as a",
+            Params.Ui.TextColours.Title, "Fisher.\n\n",
+            Params.Ui.TextColours.Good, "Food",
+            Params.Ui.TextColours.Text, " is used to allow population growth, and also reduce the frequency of death, as it prevents hunger."
+        },
+        Fisher = {
+            Params.Ui.TextColours.Text, "Turn this ",
+            Params.Ui.TextColours.Title, "Standard",
+            Params.Ui.TextColours.Text, " house into a ",
+            Params.Ui.TextColours.Title, "Fisher",
+            Params.Ui.TextColours.Text, " house.\n\nThis will provide ",
+            Params.Ui.TextColours.Good, "Food",
+            Params.Ui.TextColours.Text, " income, same as a",
+            Params.Ui.TextColours.Title, "Farmer.\n\n",
+            Params.Ui.TextColours.Good, "Food",
+            Params.Ui.TextColours.Text, " is used to allow population growth, and also reduce the frequency of death, as it prevents hunger."
+        },
+        Builder = {
+            Params.Ui.TextColours.Text, "Turn this ",
+            Params.Ui.TextColours.Title, "Standard",
+            Params.Ui.TextColours.Text, " house into a ",
+            Params.Ui.TextColours.Title, "Builder",
+            Params.Ui.TextColours.Text, " house.\n\nThis will make new houses build more quickly."
         },
         Cancel = "Deselect the tile without taking any action."
     }

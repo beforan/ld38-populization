@@ -184,16 +184,31 @@ function Ui:_selectedInfo(x, y, w, h, padx, pady)
         -- use this to modify padding, since it's broken
         local function getNextButton() local x, y, w, h = Suit.layout:row(nil, Params.Ui.ButtonHeight); return { x, y + pady, w, h - pady } end
 
+        if t.House then
+            -- Specialists
+            if t.House:CanBecomeLumberjack() then
+                local lumberjack = Suit.Button("Upgrade: Lumberjack", unpack(getNextButton()))
+                if lumberjack.hovered then tooltip = Params.Ui.InfoTips.Buttons.Lumberjack end
+                if lumberjack.hit then t.House:Convert(Params.House.Type.Lumberjack) end
+            end
+            
+            if t.House:CanBecomeFarmer() then
+                local farmer = Suit.Button("Upgrade: Farmer", unpack(getNextButton()))
+                if farmer.hovered then tooltip = Params.Ui.InfoTips.Buttons.Farmer end
+                if farmer.hit then t.House:Convert(Params.House.Type.Farmer) end
+            end
+            if t.House:CanBecomeFisher() then
+                local fisher = Suit.Button("Upgrade: Fisher", unpack(getNextButton()))
+                if fisher.hovered then tooltip = Params.Ui.InfoTips.Buttons.Fisher end
+                if fisher.hit then t.House:Convert(Params.House.Type.Fisher) end
+            end
 
-        -- Specialists
-        local lumberjack = Suit.Button("Upgrade: Lumberjack", unpack(getNextButton()))
-        if lumberjack.hovered then tooltip = Params.Ui.InfoTips.Buttons.Lumberjack end
-        if lumberjack.hit then map:Select() end
-
-        -- Suit.Button("Test button", unpack(getNextButton()))
-        -- Suit.Button("Test button 1", unpack(getNextButton()))
-        -- Suit.Button("Test button 2", unpack(getNextButton()))
-        -- Suit.Button("Test button 3", unpack(getNextButton()))
+            if t.House:CanBecomeBuilder() then
+                local builder = Suit.Button("Upgrade: Builder", unpack(getNextButton()))
+                if builder.hovered then tooltip = Params.Ui.InfoTips.Buttons.Builder end
+                if builder.hit then t.House:Convert(Params.House.Type.Builder) end
+            end
+        end
         
         -- cancel selection
         local cancel = Suit.Button("Cancel Selection", unpack(getNextButton()))

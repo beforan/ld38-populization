@@ -11,8 +11,52 @@ local House = Class {
     end
 }
 
+function House:CanBecomeFarmer()
+    if self.Type ~= Params.House.Type.Standard then return false end
+    local function isFarmerTile(tile) return tile.Type == Params.Tile.Type.Grain end
+
+    if isFarmerTile(self.Site) then return true end
+    for _, t in ipairs(Gamestate.current().Map:GetAdjacentTiles(self.Site.X, self.Site.Y)) do
+        if t then
+            if isFarmerTile(t) then return true end
+        end
+    end
+end
+
+function House:CanBecomeFisher()
+    if self.Type ~= Params.House.Type.Standard then return false end
+    local function isFisherTile(tile) return tile.Type == Params.Tile.Type.Riverside or tile.Type == Params.Tile.Type.River end
+
+    if isFisherTile(self.Site) then return true end
+    for _, t in ipairs(Gamestate.current().Map:GetAdjacentTiles(self.Site.X, self.Site.Y)) do
+        if t then
+            if isFisherTile(t) then return true end
+        end
+    end
+end
+
+function House:CanBecomeLumberjack()
+    if self.Type ~= Params.House.Type.Standard then return false end
+    local function isFarmerTile(tile) return tile.Type == Params.Tile.Type.Grain end
+
+    if isFarmerTile(self.Site) then return true end
+    for _, t in ipairs(Gamestate.current().Map:GetAdjacentTiles(self.Site.X, self.Site.Y)) do
+        if t then
+            if isFarmerTile(self.Site) then return true end
+        end
+    end
+end
+
+function House:Convert(type)
+    self.Type = type
+end
+
+function House:CanBecomeBuilder()
+    return self.Type == Params.House.Type.Standard
+end
+
 function House:draw()
-    love.graphics.draw(self.Owner.Sprites.Standard, self.Site:RealX(), self.Site:RealY())
+    love.graphics.draw(self.Owner.Sprites[self.Type], self.Site:RealX(), self.Site:RealY())
 end
 
 function House:_getBuildableNeighbours()
